@@ -1,8 +1,8 @@
 # NMOS + TypeScript = 🚀
 
-* yarn
-* yarn submodules
+-   yarn
+-   yarn submodules
 
 ## Tools
-* Update bun `curl -fsSL https://bun.sh/install | bash`.
-* yarn tool:generate
+
+-   yarn tool:generate
