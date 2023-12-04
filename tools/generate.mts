@@ -93,6 +93,18 @@ async function legacy() {
 						version: raml.version,
 					},
 					paths: {},
+					servers: [
+						{
+							url: raml.baseUri,
+							description:
+								"Testing URI - for use during development only!",
+							variables: {
+								version: {
+									default: raml.version,
+								},
+							},
+						},
+					],
 				};
 
 				for (const docs of raml.documentation) {
@@ -109,7 +121,6 @@ async function legacy() {
 				const resourceLookups: Record<string, any> = {};
 
 				if (raml.types) {
-					// schema.components = {};
 					for (const [id, value] of Object.entries<any>(raml.types)) {
 						if (value.type !== "!include")
 							throw new Error("Only includes are handled!");
