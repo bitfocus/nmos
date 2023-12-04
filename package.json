@@ -49,5 +49,10 @@
 		"rimraf": "^5.0.5",
 		"ts-node": "^10.9.1",
 		"typescript": "~5.2"
+	},
+	"dependencies": {
+		"chalk": "^5.3.0",
+		"raml2obj": "^6.8.1",
+		"yaml": "^2.3.4"
 	}
 }
