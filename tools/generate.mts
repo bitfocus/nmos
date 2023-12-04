@@ -1,12 +1,9 @@
 import { getRamlFiles, getVersions, readRamlFile } from "./lib.mjs";
-import { Chalk } from "chalk";
 import path from "path";
 import { rimraf } from "rimraf";
 import { fileURLToPath } from "url";
 import * as cp from "child_process";
 import fs from "fs-extra";
-
-const c = new Chalk({ level: 2 });
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 const generatedBasePath = path.join(__dirname, "../src/generated");
@@ -19,8 +16,6 @@ async function legacy() {
 	const standards = ["is-04", "is-05"];
 
 	for (const standard of standards) {
-		console.log(c.bgRed.whiteBright("\n#", standard));
-
 		const versions = await getVersions(standard);
 		for (const version of versions) {
 			await fs.mkdir(path.join(generatedBasePath, standard, version), {
@@ -29,6 +24,7 @@ async function legacy() {
 
 			if (version != "v1.3") continue;
 
+			// Copy json schema fragments
 			await fs.copy(
 				path.join(
 					__dirname,
@@ -42,11 +38,8 @@ async function legacy() {
 				path.join(generatedBasePath, standard, version, "schemas"),
 			);
 
-			console.log("-", c.yellowBright(version));
 			const files = await getRamlFiles(standard, version);
 			for (const file of files) {
-				console.log(c.magenta(file));
-
 				const name = path.parse(file).name;
 				// if (name !== "RegistrationAPI") continue;
 
@@ -68,14 +61,6 @@ async function legacy() {
 					name + ".json",
 				);
 				console.log("try", standardPath, outPath);
-
-				// const parsed =
-				// 	await wap.WebApiParser.raml10.parse(standardPath);
-
-				// // Generate OAS file
-				// const str = await wap.WebApiParser.oas20.generateString(parsed);
-				// await fs.writeFile(outPath, str);
-				// console.log(str);
 
 				const genPath = path.join(
 					generatedBasePath,
@@ -128,7 +113,7 @@ async function legacy() {
 					}
 				}
 
-				recurseResources(resourceLookups, schema, raml, "", 1, version);
+				recurseResources(resourceLookups, schema, raml, "", version);
 
 				await fs.writeFile(
 					outPath,
@@ -147,31 +132,17 @@ function recurseResources(
 	schema: any,
 	resources: any[],
 	path: string = "/",
-	level: number = 0,
 	version: string,
 ) {
-	console.log(resources);
 	for (const [id, resource] of Object.entries(resources)) {
 		// TODO - listMethods has some overlap, and we want to ensure we don't miss any keys
 		if (!id.startsWith("/")) continue;
-
-		console.log(
-			"   ".repeat(level) +
-				" " +
-				c.green(
-					id,
-					// resource.absoluteUri
-					// 	.replace("http://example.api.com/x-nmos", "")
-					// 	.replace("http://api.example.com/x-nmos", "")
-					// 	.replace("{version}", version),
-				),
-		);
 
 		if (schema.paths[id])
 			throw new Error(`Resouce ${id} has already been defined!`);
 		const resourceSchema = (schema.paths[id] = {});
 
-		listMethods(resourceLookups, resourceSchema, resource, level);
+		listMethods(resourceLookups, resourceSchema, resource);
 
 		if (resource) {
 			recurseResources(
@@ -179,7 +150,6 @@ function recurseResources(
 				schema,
 				resource,
 				path + id,
-				level + 1,
 				version,
 			);
 		}
@@ -190,7 +160,6 @@ function listMethods(
 	resourceLookups: Record<string, any>,
 	resourceSchema: any,
 	methods: any,
-	level: number,
 ) {
 	const methodNames = [
 		"get",
@@ -206,16 +175,6 @@ function listMethods(
 	for (const methodName of methodNames) {
 		const method = methods[methodName];
 		if (!method) continue;
-
-		console.log(
-			"   ".repeat(level) +
-				"   " +
-				" " +
-				c.blue(methodName.toUpperCase()) +
-				": " +
-				method.description?.trim().replace("\n", "\\n ").substr(0, 50) +
-				"[..]",
-		);
 
 		if (resourceSchema[methodName])
 			throw new Error(`Method already defined`);
@@ -284,7 +243,6 @@ function listMethods(
 		}
 
 		if (method.body) {
-			console.log("BOD", method.body);
 			if (typeof method.body.type === "string") {
 				methodSchema.requestBody = {
 					content: {
@@ -311,10 +269,8 @@ function listMethods(
 				throw new Error("Response body unhandled");
 			}
 		}
-
-		// console.log(JSON.stringify(method, undefined, 4));
 	}
-	listUriParameters(resourceSchema, methods, level);
+	listUriParameters(resourceSchema, methods);
 }
 
 function assertKnownKeys(obj: any, keys: string[]) {
@@ -330,25 +286,12 @@ function assertKnownKeys(obj: any, keys: string[]) {
 	}
 }
 
-function listUriParameters(methodSchema: any, resource: any, level: number) {
+function listUriParameters(methodSchema: any, resource: any) {
 	const params = resource.uriParameters;
-	console.log(params);
 	if (params && Object.keys(params).length) {
-		console.log("   ".repeat(level) + "     - params:");
-
 		methodSchema.parameters = [];
 
 		for (const [id, param] of Object.entries<any>(params)) {
-			console.log(
-				"   ".repeat(level) +
-					"   " +
-					"   " +
-					" " +
-					c.cyan(id) +
-					": " +
-					param.type,
-			);
-
 			let schema = undefined;
 			switch (param.type) {
 				case "string":
