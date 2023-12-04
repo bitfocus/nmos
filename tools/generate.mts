@@ -7,6 +7,7 @@ import fs from "fs-extra";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 const generatedBasePath = path.join(__dirname, "../src/generated");
+const openapiBasePath = path.join(__dirname, "../openapi");
 
 async function legacy() {
 	// Delete previous generation
@@ -16,13 +17,17 @@ async function legacy() {
 	const standards = ["is-04", "is-05"];
 
 	for (const standard of standards) {
+		await fs.mkdir(path.join(generatedBasePath, standard), {
+			recursive: true,
+		});
+
 		const versions = await getVersions(standard);
 		for (const version of versions) {
-			await fs.mkdir(path.join(generatedBasePath, standard, version), {
+			const openapiPath = path.join(openapiBasePath, standard, version);
+			console.log(`Generating ${openapiPath}`);
+			await fs.mkdir(openapiPath, {
 				recursive: true,
 			});
-
-			if (version != "v1.3") continue;
 
 			// Copy json schema fragments
 			await fs.copy(
@@ -35,7 +40,7 @@ async function legacy() {
 					"APIs",
 					"schemas",
 				),
-				path.join(generatedBasePath, standard, version, "schemas"),
+				path.join(openapiBasePath, standard, version, "schemas"),
 			);
 
 			const rootSchema: any = {
@@ -82,7 +87,7 @@ async function legacy() {
 					raml,
 					"",
 					version,
-					shortname,
+					[shortname],
 				);
 
 				const prefixIndex = raml.baseUri.indexOf("/x-nmos/");
@@ -98,7 +103,7 @@ async function legacy() {
 			}
 
 			const rootSchemaPath = path.join(
-				generatedBasePath,
+				openapiBasePath,
 				standard,
 				version,
 				"openapi.json",
@@ -109,12 +114,8 @@ async function legacy() {
 				JSON.stringify(rootSchema, undefined, 4),
 			);
 
-			const genPath = path.join(
-				generatedBasePath,
-				standard,
-				version,
-				"NameHere",
-			);
+			const genPath = path.join(generatedBasePath, standard, version);
+			console.log(`Compiling ${rootSchemaPath} to ${genPath}`);
 
 			cp.execSync(
 				`openapi-generator-cli generate -i ${rootSchemaPath} -o ${genPath} -g typescript-fetch -p supportsES6=true`,
@@ -127,28 +128,35 @@ function recurseResources(
 	resourceLookups: Record<string, any>,
 	schemaPaths: any,
 	resources: any[],
-	path: string = "/",
+	path: string,
 	version: string,
-	name: string,
+	methodTags: string[],
 ) {
 	for (const [id, resource] of Object.entries(resources)) {
 		// TODO - listMethods has some overlap, and we want to ensure we don't miss any keys
 		if (!id.startsWith("/")) continue;
+		const fullId = path + id;
 
-		if (schemaPaths[id])
-			throw new Error(`Resouce ${id} has already been defined!`);
-		const resourceSchema = (schemaPaths[id] = {});
+		if (schemaPaths[fullId])
+			throw new Error(`Resouce ${fullId} has already been defined!`);
+		const resourceSchema = (schemaPaths[fullId] = {});
 
-		listMethods(resourceLookups, resourceSchema, resource, name);
+		listMethods(
+			resourceLookups,
+			resourceSchema,
+			fullId,
+			resource,
+			methodTags,
+		);
 
 		if (resource) {
 			recurseResources(
 				resourceLookups,
 				schemaPaths,
 				resource,
-				path + id,
+				fullId,
 				version,
-				name,
+				methodTags,
 			);
 		}
 	}
@@ -157,8 +165,9 @@ function recurseResources(
 function listMethods(
 	resourceLookups: Record<string, any>,
 	resourceSchema: any,
+	methodPath: string,
 	methods: any,
-	name: string,
+	methodTags: string[],
 ) {
 	const methodNames = [
 		"get",
@@ -180,7 +189,7 @@ function listMethods(
 		const methodSchema: any = (resourceSchema[methodName] = {});
 		methodSchema.summary = method.description;
 		methodSchema.responses = {};
-		methodSchema.tags = [name];
+		methodSchema.tags = [...methodTags];
 
 		for (const [code, response] of Object.entries<any>(method.responses)) {
 			if (!response) {
@@ -270,7 +279,7 @@ function listMethods(
 			}
 		}
 	}
-	listUriParameters(resourceSchema, methods);
+	listUriParameters(resourceSchema, methodPath, methods);
 }
 
 function assertKnownKeys(obj: any, keys: string[]) {
@@ -286,7 +295,11 @@ function assertKnownKeys(obj: any, keys: string[]) {
 	}
 }
 
-function listUriParameters(methodSchema: any, resource: any) {
+function listUriParameters(
+	methodSchema: any,
+	methodPath: string,
+	resource: any,
+) {
 	const params = resource.uriParameters;
 	if (params && Object.keys(params).length) {
 		methodSchema.parameters = [];
@@ -324,6 +337,21 @@ function listUriParameters(methodSchema: any, resource: any) {
 				description: param.description,
 				schema,
 			});
+		}
+	} else {
+		// is-05 is missing definition of some parameters
+		const matches = [...methodPath.matchAll(/{(.+?)}/g)];
+		if (matches.length > 0) {
+			methodSchema.parameters = [];
+			for (const match of matches) {
+				methodSchema.parameters.push({
+					name: match[1],
+					in: "path",
+					required: true,
+					description: match[1],
+					schema: { type: "string" },
+				});
+			}
 		}
 	}
 }
