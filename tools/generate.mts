@@ -94,7 +94,7 @@ async function legacy() {
 					}
 				}
 
-				recurseResources(schema, raml.resources, "", 1, version);
+				recurseResources(schema, raml, "", 1, version);
 
 				await fs.writeFile(
 					outPath,
@@ -116,68 +116,68 @@ function recurseResources(
 	level: number = 0,
 	version: string,
 ) {
-	for (const resource of resources) {
+	console.log(resources);
+	for (const [id, resource] of Object.entries(resources)) {
+		if (!id.startsWith("/")) continue;
+
 		console.log(
 			"   ".repeat(level) +
 				" " +
 				c.green(
-					resource.absoluteUri
-						.replace("http://example.api.com/x-nmos", "")
-						.replace("http://api.example.com/x-nmos", "")
-						.replace("{version}", version),
+					id,
+					// resource.absoluteUri
+					// 	.replace("http://example.api.com/x-nmos", "")
+					// 	.replace("http://api.example.com/x-nmos", "")
+					// 	.replace("{version}", version),
 				),
 		);
 
-		if (schema.paths[resource.relativeUri])
-			throw new Error(
-				`Resouce ${resource.relativeUri} has already been defined!`,
-			);
-		const resourceSchema = (schema.paths[resource.relativeUri] = {});
+		if (schema.paths[id])
+			throw new Error(`Resouce ${id} has already been defined!`);
+		const resourceSchema = (schema.paths[id] = {});
 
-		listMethods(resourceSchema, resource.methods, level);
+		listMethods(resourceSchema, resource, level);
 
-		if (resource.resources) {
-			recurseResources(
-				schema,
-				resource.resources,
-				path + resource.relativeUri,
-				level + 1,
-				version,
-			);
+		if (resource) {
+			recurseResources(schema, resource, path + id, level + 1, version);
 		}
 	}
 }
 
-function listMethods(resourceSchema: any, methods: any[], level: number) {
-	for (const method of methods) {
+function listMethods(resourceSchema: any, methods: any, level: number) {
+	const methodNames = ["get", "post", "put", "delete"]; // TODO
+	for (const methodName of methodNames) {
+		const method = methods[methodName];
+		if (!method) continue;
+
 		console.log(
 			"   ".repeat(level) +
 				"   " +
 				" " +
-				c.blue(method.method.toUpperCase()) +
+				c.blue(methodName.toUpperCase()) +
 				": " +
 				method.description?.trim().replace("\n", "\\n ").substr(0, 50) +
 				"[..]",
 		);
 
-		if (resourceSchema[method.method])
+		if (resourceSchema[methodName])
 			throw new Error(`Method already defined`);
-		const methodSchema: any = (resourceSchema[method.method] = {});
+		const methodSchema: any = (resourceSchema[methodName] = {});
 		methodSchema.summary = method.description;
 		methodSchema.responses = {};
 
-		for (const response of method.responses) {
-			// if (response.body.length !== 1)
-			// 	throw new Error(`Method already defined`);
-			// methodSchema.responses[response.code] = {
-			// 	description: response.code + "",
-			// 	content: response.body[0],
-			// };
-		}
+		// for (const response of method.responses) {
+		// if (response.body.length !== 1)
+		// 	throw new Error(`Method already defined`);
+		// methodSchema.responses[response.code] = {
+		// 	description: response.code + "",
+		// 	content: response.body[0],
+		// };
+		// }
 
-		console.log(JSON.stringify(method, undefined, 4));
+		// console.log(JSON.stringify(method, undefined, 4));
 
-		listUriParameters(methodSchema, method, level);
+		listUriParameters(methodSchema, methods, level);
 	}
 }
 
@@ -194,20 +194,21 @@ function assertKnownKeys(obj: any, keys: string[]) {
 	}
 }
 
-function listUriParameters(methodSchema: any, method: any, level: number) {
-	const params = method.allUriParameters;
-	if (params && params.length) {
+function listUriParameters(methodSchema: any, resource: any, level: number) {
+	const params = resource.uriParameters;
+	console.log(params);
+	if (params && Object.keys(params).length) {
 		console.log("   ".repeat(level) + "     - params:");
 
 		methodSchema.parameters = [];
 
-		for (const param of params) {
+		for (const [id, param] of Object.entries<any>(params)) {
 			console.log(
 				"   ".repeat(level) +
 					"   " +
 					"   " +
 					" " +
-					c.cyan(param.name) +
+					c.cyan(id) +
 					": " +
 					param.type,
 			);
@@ -238,7 +239,7 @@ function listUriParameters(methodSchema: any, method: any, level: number) {
 			}
 
 			methodSchema.parameters.push({
-				name: param.name,
+				name: id,
 				in: "path",
 				required: true,
 				description: param.description,

@@ -3,6 +3,7 @@
 import fs from "fs/promises";
 import path from "path";
 import { fileURLToPath } from "url";
+import yaml from "js-yaml";
 
 // @ts-ignore
 import raml from "raml2obj";
@@ -33,6 +34,35 @@ export async function getRamlFiles(
 	return files.filter((file) => file.endsWith(".raml"));
 }
 
+class CustomTag {
+	type: any;
+	data: any;
+	constructor(type: any, data: any) {
+		this.type = type;
+		this.data = data;
+	}
+}
+
+const tags = ["scalar", "sequence", "mapping"].map(function (kind) {
+	// first argument here is a prefix, so this type will handle anything starting with !
+	return new yaml.Type("!", {
+		kind: kind as any,
+		multi: true,
+		representName: function (object: any) {
+			return object.type;
+		},
+		represent: function (object: any) {
+			return object.data;
+		},
+		instanceOf: CustomTag,
+		construct: function (data, type) {
+			return new CustomTag(type, data);
+		},
+	});
+});
+
+const SCHEMA = yaml.DEFAULT_SCHEMA.extend(tags);
+
 // Read a RAML file from ./submodules/{standard}/{version}/APIs/{file} and parse it. It's yaml.
 export async function readRamlFile(
 	standard: string,
@@ -49,8 +79,12 @@ export async function readRamlFile(
 		file,
 	);
 
-	return await raml.parse(standardPath, {
-		extensionsAndOverlays: [],
-		collectionFormat: "arrays",
-	});
+	const str = await fs.readFile(standardPath, "utf8");
+
+	return yaml.load(str.toString(), { schema: SCHEMA });
+
+	// return await raml.parse(standardPath, {
+	// 	extensionsAndOverlays: [],
+	// 	collectionFormat: "arrays",
+	// });
 }
