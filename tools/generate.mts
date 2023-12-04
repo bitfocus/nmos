@@ -94,41 +94,12 @@ async function legacy() {
 					}
 				}
 
-				const generated = recurseResources(
-					schema,
-					raml.resources,
-					"",
-					1,
-					version,
-				);
+				recurseResources(schema, raml.resources, "", 1, version);
 
 				await fs.writeFile(
 					outPath,
 					JSON.stringify(schema, undefined, 4),
 				);
-
-				// const docs: string[] = [];
-				// if (raml.documentation && raml.documentation.length > 0) {
-				// 	docs.push("/**");
-				// 	for (const section of raml.documentation) {
-				// 		docs.push(` * ## ${section.title}`);
-				// 		docs.push(` * ${section.content.trim()}`);
-				// 	}
-				// 	docs.push("**/");
-				// }
-
-				// generated.unshift(...docs, `export class ${name} {`);
-				// generated.push("}");
-
-				// await fs.writeFile(
-				// 	path.join(
-				// 		generatedBasePath,
-				// 		standard,
-				// 		version,
-				// 		name + ".ts",
-				// 	),
-				// 	generated.join("\n"),
-				// );
 
 				cp.execSync(
 					`openapi-generator-cli generate -i ${outPath} -o ${genPath} -g typescript-fetch -p supportsES6=true`,
@@ -144,11 +115,8 @@ function recurseResources(
 	path: string = "/",
 	level: number = 0,
 	version: string,
-): string[] {
-	const lines: string[] = [];
-
+) {
 	for (const resource of resources) {
-		// console.log(resource);
 		console.log(
 			"   ".repeat(level) +
 				" " +
@@ -168,8 +136,6 @@ function recurseResources(
 
 		listMethods(resourceSchema, resource.methods, level);
 
-		lines.push(`/**`, ` * ${resource.displayName}`, `**/`);
-
 		if (resource.resources) {
 			recurseResources(
 				schema,
@@ -180,8 +146,6 @@ function recurseResources(
 			);
 		}
 	}
-
-	return lines;
 }
 
 function listMethods(resourceSchema: any, methods: any[], level: number) {
