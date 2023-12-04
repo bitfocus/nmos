@@ -57,12 +57,12 @@ async function legacy() {
 				);
 				console.log("try", standardPath, outPath);
 
-				const parsed =
-					await wap.WebApiParser.raml10.parse(standardPath);
+				// const parsed =
+				// 	await wap.WebApiParser.raml10.parse(standardPath);
 
-				// Generate OAS file
-				const str = await wap.WebApiParser.oas20.generateString(parsed);
-				await fs.writeFile(outPath, str);
+				// // Generate OAS file
+				// const str = await wap.WebApiParser.oas20.generateString(parsed);
+				// await fs.writeFile(outPath, str);
 				// console.log(str);
 
 				const genPath = path.join(
@@ -72,39 +72,66 @@ async function legacy() {
 					name,
 				);
 
-				cp.execSync(
-					`openapi-generator-cli generate -i ${outPath} -o ${genPath} -g typescript-fetch -p supportsES6=true --skip-validate-spec`,
-				);
-
 				const raml = await readRamlFile(standard, version, file);
+
+				const schema: any = {
+					openapi: "3.0.3",
+					info: {
+						title: raml.title,
+						version: raml.version,
+					},
+					paths: {},
+				};
+
+				for (const docs of raml.documentation) {
+					if (docs.title === "Overview") {
+						schema.info.description = docs.content.trim();
+					} else if (docs.title === "Further Documentation") {
+						// schema.externalDocs = {
+						// 	description: docs.content.trim(),
+						// 	url: "https://example.com", // TODO
+						// };
+					}
+				}
+
 				const generated = recurseResources(
+					schema,
 					raml.resources,
 					"",
 					1,
 					version,
 				);
 
-				const docs: string[] = [];
-				if (raml.documentation && raml.documentation.length > 0) {
-					docs.push("/**");
-					for (const section of raml.documentation) {
-						docs.push(` * ## ${section.title}`);
-						docs.push(` * ${section.content.trim()}`);
-					}
-					docs.push("**/");
-				}
-
-				generated.unshift(...docs, `export class ${name} {`);
-				generated.push("}");
-
 				await fs.writeFile(
-					path.join(
-						generatedBasePath,
-						standard,
-						version,
-						name + ".ts",
-					),
-					generated.join("\n"),
+					outPath,
+					JSON.stringify(schema, undefined, 4),
+				);
+
+				// const docs: string[] = [];
+				// if (raml.documentation && raml.documentation.length > 0) {
+				// 	docs.push("/**");
+				// 	for (const section of raml.documentation) {
+				// 		docs.push(` * ## ${section.title}`);
+				// 		docs.push(` * ${section.content.trim()}`);
+				// 	}
+				// 	docs.push("**/");
+				// }
+
+				// generated.unshift(...docs, `export class ${name} {`);
+				// generated.push("}");
+
+				// await fs.writeFile(
+				// 	path.join(
+				// 		generatedBasePath,
+				// 		standard,
+				// 		version,
+				// 		name + ".ts",
+				// 	),
+				// 	generated.join("\n"),
+				// );
+
+				cp.execSync(
+					`openapi-generator-cli generate -i ${outPath} -o ${genPath} -g typescript-fetch -p supportsES6=true`,
 				);
 			}
 		}
@@ -112,6 +139,7 @@ async function legacy() {
 }
 
 function recurseResources(
+	schema: any,
 	resources: any[],
 	path: string = "/",
 	level: number = 0,
@@ -131,12 +159,20 @@ function recurseResources(
 						.replace("{version}", version),
 				),
 		);
-		listMethods(resource.methods, level);
+
+		if (schema.paths[resource.relativeUri])
+			throw new Error(
+				`Resouce ${resource.relativeUri} has already been defined!`,
+			);
+		const resourceSchema = (schema.paths[resource.relativeUri] = {});
+
+		listMethods(resourceSchema, resource.methods, level);
 
 		lines.push(`/**`, ` * ${resource.displayName}`, `**/`);
 
 		if (resource.resources) {
 			recurseResources(
+				schema,
 				resource.resources,
 				path + resource.relativeUri,
 				level + 1,
@@ -148,7 +184,7 @@ function recurseResources(
 	return lines;
 }
 
-function listMethods(methods: any[], level: number) {
+function listMethods(resourceSchema: any, methods: any[], level: number) {
 	for (const method of methods) {
 		console.log(
 			"   ".repeat(level) +
@@ -160,14 +196,46 @@ function listMethods(methods: any[], level: number) {
 				"[..]",
 		);
 
-		listUriParameters(method, level);
+		if (resourceSchema[method.method])
+			throw new Error(`Method already defined`);
+		const methodSchema: any = (resourceSchema[method.method] = {});
+		methodSchema.summary = method.description;
+		methodSchema.responses = {};
+
+		for (const response of method.responses) {
+			// if (response.body.length !== 1)
+			// 	throw new Error(`Method already defined`);
+			// methodSchema.responses[response.code] = {
+			// 	description: response.code + "",
+			// 	content: response.body[0],
+			// };
+		}
+
+		console.log(JSON.stringify(method, undefined, 4));
+
+		listUriParameters(methodSchema, method, level);
 	}
 }
 
-function listUriParameters(method: any, level: number) {
+function assertKnownKeys(obj: any, keys: string[]) {
+	for (const key of Object.keys(obj)) {
+		if (keys.indexOf(key) === -1)
+			throw new Error(
+				`Found unexpected key ${key} in object: ${JSON.stringify(
+					obj,
+					undefined,
+					4,
+				)}`,
+			);
+	}
+}
+
+function listUriParameters(methodSchema: any, method: any, level: number) {
 	const params = method.allUriParameters;
 	if (params && params.length) {
 		console.log("   ".repeat(level) + "     - params:");
+
+		methodSchema.parameters = [];
 
 		for (const param of params) {
 			console.log(
@@ -179,6 +247,39 @@ function listUriParameters(method: any, level: number) {
 					": " +
 					param.type,
 			);
+
+			let schema = undefined;
+			switch (param.type) {
+				case "string":
+					assertKnownKeys(param, [
+						// Parser builtin:
+						"displayName",
+						"key",
+						"required",
+						"typePropertyKind",
+						// Useful:
+						"name",
+						"type",
+						"pattern",
+						"enum",
+					]);
+					schema = {
+						type: "string",
+						pattern: param.pattern,
+						enum: param.enum,
+					};
+					break;
+				default:
+					throw new Error("Bad param type");
+			}
+
+			methodSchema.parameters.push({
+				name: param.name,
+				in: "path",
+				required: true,
+				description: param.description,
+				schema,
+			});
 		}
 	}
 }
