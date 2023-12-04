@@ -2,12 +2,15 @@
 
 import fs from "fs/promises";
 import path from "path";
+import * as url from "url";
+
+// @ts-ignore
 import raml from "raml2obj";
 
 /* Find all versions in ./submodules/{standard} */
 export async function getVersions(standard: string): Promise<string[]> {
-	const standardPath = path.join(__dirname, "..", "submodules", standard);
-	const files = await fs.readdir(standardPath);
+	const standardPath = path.join("..", "submodules", standard);
+	const files = await fs.readdir(new URL(standardPath, import.meta.url));
 	return files.filter((file) => file.startsWith("v"));
 }
 
@@ -17,14 +20,13 @@ export async function getRamlFiles(
 	version: string,
 ): Promise<string[]> {
 	const standardPath = path.join(
-		__dirname,
 		"..",
 		"submodules",
 		standard,
 		version,
 		"APIs",
 	);
-	const files = await fs.readdir(standardPath);
+	const files = await fs.readdir(new URL(standardPath, import.meta.url));
 	return files.filter((file) => file.endsWith(".raml"));
 }
 
@@ -35,7 +37,6 @@ export async function readRamlFile(
 	file: string,
 ): Promise<any> {
 	const standardPath = path.join(
-		__dirname,
 		"..",
 		"submodules",
 		standard,
@@ -44,8 +45,11 @@ export async function readRamlFile(
 		file,
 	);
 
-	return await raml.parse(standardPath, {
-		extensionsAndOverlays: [],
-		collectionFormat: "arrays",
-	});
+	return await raml.parse(
+		url.fileURLToPath(new URL(standardPath, import.meta.url)),
+		{
+			extensionsAndOverlays: [],
+			collectionFormat: "arrays",
+		},
+	);
 }

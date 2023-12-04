@@ -1,4 +1,4 @@
-import { getRamlFiles, getVersions, readRamlFile } from "./lib";
+import { getRamlFiles, getVersions, readRamlFile } from "./lib.mjs";
 import { Chalk } from "chalk";
 
 const c = new Chalk({ level: 2 });

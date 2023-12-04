@@ -10,7 +10,7 @@
 		"dev": "DEBUG_WRITE_TO_FILE=1  nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/main.ts",
 		"submodules": "git submodule init && git submodule update",
 		"release": "release-it",
-		"tool:generate": "bun ./tools/generate.ts"
+		"tool:generate": "node --loader ts-node/esm ./tools/generate.mts"
 	},
 	"repository": {
 		"type": "git",

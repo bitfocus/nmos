@@ -1,6 +1,11 @@
 {
 	"extends": "@tsconfig/node18/tsconfig.json",
-	"include": ["src/*.ts", "tools/*.ts"],
+	"include": [
+		"src/*.ts",
+		"tools/*.ts",
+		"tools/lib.mts",
+		"tools/generate.mts"
+	],
 	"compilerOptions": {
 		"outDir": "./build",
 		"importHelpers": false
