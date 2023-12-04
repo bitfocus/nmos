@@ -3,9 +3,8 @@ import { Chalk } from "chalk";
 import path from "path";
 import { rimraf } from "rimraf";
 import { fileURLToPath } from "url";
-import * as fs from "fs/promises";
-import wap from "webapi-parser";
 import * as cp from "child_process";
+import fs from "fs-extra";
 
 const c = new Chalk({ level: 2 });
 
@@ -29,6 +28,19 @@ async function legacy() {
 			});
 
 			if (version != "v1.3") continue;
+
+			await fs.copy(
+				path.join(
+					__dirname,
+					"..",
+					"submodules",
+					standard,
+					version,
+					"APIs",
+					"schemas",
+				),
+				path.join(generatedBasePath, standard, version, "schemas"),
+			);
 
 			console.log("-", c.yellowBright(version));
 			const files = await getRamlFiles(standard, version);
@@ -75,7 +87,7 @@ async function legacy() {
 				const raml = await readRamlFile(standard, version, file);
 
 				const schema: any = {
-					openapi: "3.0.3",
+					openapi: "3.1.0",
 					info: {
 						title: raml.title,
 						version: raml.version,
@@ -94,13 +106,23 @@ async function legacy() {
 					}
 				}
 
-				recurseResources(schema, raml, "", 1, version);
+				const resourceLookups: Record<string, any> = {};
+
+				if (raml.types) {
+					// schema.components = {};
+					for (const [id, value] of Object.entries<any>(raml.types)) {
+						if (value.type !== "!include")
+							throw new Error("Only includes are handled!");
+						resourceLookups[id] = `${value.data}`;
+					}
+				}
+
+				recurseResources(resourceLookups, schema, raml, "", 1, version);
 
 				await fs.writeFile(
 					outPath,
 					JSON.stringify(schema, undefined, 4),
 				);
-
 				cp.execSync(
 					`openapi-generator-cli generate -i ${outPath} -o ${genPath} -g typescript-fetch -p supportsES6=true`,
 				);
@@ -110,6 +132,7 @@ async function legacy() {
 }
 
 function recurseResources(
+	resourceLookups: Record<string, any>,
 	schema: any,
 	resources: any[],
 	path: string = "/",
@@ -118,6 +141,7 @@ function recurseResources(
 ) {
 	console.log(resources);
 	for (const [id, resource] of Object.entries(resources)) {
+		// TODO - listMethods has some overlap, and we want to ensure we don't miss any keys
 		if (!id.startsWith("/")) continue;
 
 		console.log(
@@ -136,16 +160,38 @@ function recurseResources(
 			throw new Error(`Resouce ${id} has already been defined!`);
 		const resourceSchema = (schema.paths[id] = {});
 
-		listMethods(resourceSchema, resource, level);
+		listMethods(resourceLookups, resourceSchema, resource, level);
 
 		if (resource) {
-			recurseResources(schema, resource, path + id, level + 1, version);
+			recurseResources(
+				resourceLookups,
+				schema,
+				resource,
+				path + id,
+				level + 1,
+				version,
+			);
 		}
 	}
 }
 
-function listMethods(resourceSchema: any, methods: any, level: number) {
-	const methodNames = ["get", "post", "put", "delete"]; // TODO
+function listMethods(
+	resourceLookups: Record<string, any>,
+	resourceSchema: any,
+	methods: any,
+	level: number,
+) {
+	const methodNames = [
+		"get",
+		"post",
+		"put",
+		"delete",
+		"head",
+		"options",
+		"trace",
+		"patch",
+		"connect",
+	]; // TODO
 	for (const methodName of methodNames) {
 		const method = methods[methodName];
 		if (!method) continue;
@@ -166,14 +212,47 @@ function listMethods(resourceSchema: any, methods: any, level: number) {
 		methodSchema.summary = method.description;
 		methodSchema.responses = {};
 
-		// for (const response of method.responses) {
-		// if (response.body.length !== 1)
-		// 	throw new Error(`Method already defined`);
-		// methodSchema.responses[response.code] = {
-		// 	description: response.code + "",
-		// 	content: response.body[0],
-		// };
-		// }
+		console.log(method.responses);
+		for (const [code, response] of Object.entries<any>(method.responses)) {
+			if (!response) {
+				// methodSchema.responses[code] = {
+				// 	// description: response.description,
+				// 	// headers: response.headers,
+				// 	// content: response.body,
+				// };
+			} else {
+				let content = undefined;
+				if (response.body) {
+					let schema = null;
+					if (typeof response.body.type === "string") {
+						schema = { type: "object" };
+						schema = {
+							$ref:
+								resourceLookups[response.body.type] ??
+								`#/components/${response.body.type}`,
+						};
+					} else if (response.body.type.type === "!include") {
+						schema = {
+							$ref: response.body.type.data,
+						};
+					} else {
+						throw new Error("Resposne body unhanlded");
+					}
+					if (schema)
+						content = {
+							"application/json": {
+								schema: schema,
+							},
+						};
+				}
+
+				methodSchema.responses[code] = {
+					description: response.description ?? code + "",
+					headers: response.headers,
+					content: content,
+				};
+			}
+		}
 
 		// console.log(JSON.stringify(method, undefined, 4));
 
