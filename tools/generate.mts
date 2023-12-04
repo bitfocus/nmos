@@ -212,20 +212,18 @@ function listMethods(
 		methodSchema.summary = method.description;
 		methodSchema.responses = {};
 
-		console.log(method.responses);
 		for (const [code, response] of Object.entries<any>(method.responses)) {
 			if (!response) {
-				// methodSchema.responses[code] = {
-				// 	// description: response.description,
-				// 	// headers: response.headers,
-				// 	// content: response.body,
-				// };
+				methodSchema.responses[code] = {
+					description: code + "",
+					// headers: response.headers,
+					// content: response.body,
+				};
 			} else {
 				let content = undefined;
 				if (response.body) {
 					let schema = null;
 					if (typeof response.body.type === "string") {
-						schema = { type: "object" };
 						schema = {
 							$ref:
 								resourceLookups[response.body.type] ??
@@ -236,12 +234,32 @@ function listMethods(
 							$ref: response.body.type.data,
 						};
 					} else {
-						throw new Error("Resposne body unhanlded");
+						throw new Error("Response body unhandled");
 					}
+					// let example = undefined;
+					if (response.body.example) {
+						// if (typeof response.body.example === "string") {
+						// 	example = {
+						// 		$ref: resourceLookups[
+						// 			response.body.example.type
+						// 		],
+						// 	};
+						// } else
+						// if (response.body.example.type === "!include") {
+						// 	schema = {
+						// 		$ref: response.body.example.data,
+						// 	};
+						// } else {
+						// 	throw new Error("Response example unhandled");
+						// }
+						// This needs some extra path copying and translation to work, not worth it for now
+					}
+
 					if (schema)
 						content = {
 							"application/json": {
 								schema: schema,
+								// example,
 							},
 						};
 				}
@@ -254,10 +272,38 @@ function listMethods(
 			}
 		}
 
-		// console.log(JSON.stringify(method, undefined, 4));
+		if (method.body) {
+			console.log("BOD", method.body);
+			if (typeof method.body.type === "string") {
+				methodSchema.requestBody = {
+					content: {
+						"application/json": {
+							schema: {
+								$ref:
+									resourceLookups[method.body.type] ??
+									`#/components/${method.body.type}`,
+							},
+						},
+					},
+				};
+			} else if (method.body.type.type === "!include") {
+				methodSchema.requestBody = {
+					content: {
+						"application/json": {
+							schema: {
+								$ref: method.body.type.data,
+							},
+						},
+					},
+				};
+			} else {
+				throw new Error("Response body unhandled");
+			}
+		}
 
-		listUriParameters(methodSchema, methods, level);
+		// console.log(JSON.stringify(method, undefined, 4));
 	}
+	listUriParameters(resourceSchema, methods, level);
 }
 
 function assertKnownKeys(obj: any, keys: string[]) {
