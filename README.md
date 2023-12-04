@@ -1,1 +1,4 @@
-# NMOS!
+# NMOS + TypeScript = 🚀
+
+* yarn
+* yarn submodules
