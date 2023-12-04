@@ -5,9 +5,6 @@ import path from "path";
 import { fileURLToPath } from "url";
 import yaml from "js-yaml";
 
-// @ts-ignore
-import raml from "raml2obj";
-
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
 /* Find all versions in ./submodules/{standard} */
@@ -82,9 +79,4 @@ export async function readRamlFile(
 	const str = await fs.readFile(standardPath, "utf8");
 
 	return yaml.load(str.toString(), { schema: SCHEMA });
-
-	// return await raml.parse(standardPath, {
-	// 	extensionsAndOverlays: [],
-	// 	collectionFormat: "arrays",
-	// });
 }

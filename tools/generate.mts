@@ -38,70 +38,28 @@ async function legacy() {
 				path.join(generatedBasePath, standard, version, "schemas"),
 			);
 
+			const rootSchema: any = {
+				openapi: "3.1.0",
+				info: {
+					title: standard,
+					version: version,
+					description: `AMWA NMOS ${standard}`,
+				},
+				paths: {},
+				servers: [
+					{
+						url: "http://api.example.com/x-nmos",
+						description:
+							"Testing URI - for use during development only!",
+					},
+				],
+			};
+
 			const files = await getRamlFiles(standard, version);
 			for (const file of files) {
 				const name = path.parse(file).name;
-				// if (name !== "RegistrationAPI") continue;
-
-				const standardPath = path.join(
-					"file:/",
-					__dirname,
-					"..",
-					"submodules",
-					standard,
-					version,
-					"APIs",
-					file,
-				);
-
-				const outPath = path.join(
-					generatedBasePath,
-					standard,
-					version,
-					name + ".json",
-				);
-				console.log("try", standardPath, outPath);
-
-				const genPath = path.join(
-					generatedBasePath,
-					standard,
-					version,
-					name,
-				);
 
 				const raml = await readRamlFile(standard, version, file);
-
-				const schema: any = {
-					openapi: "3.1.0",
-					info: {
-						title: raml.title,
-						version: raml.version,
-					},
-					paths: {},
-					servers: [
-						{
-							url: raml.baseUri,
-							description:
-								"Testing URI - for use during development only!",
-							variables: {
-								version: {
-									default: raml.version,
-								},
-							},
-						},
-					],
-				};
-
-				for (const docs of raml.documentation) {
-					if (docs.title === "Overview") {
-						schema.info.description = docs.content.trim();
-					} else if (docs.title === "Further Documentation") {
-						// schema.externalDocs = {
-						// 	description: docs.content.trim(),
-						// 	url: "https://example.com", // TODO
-						// };
-					}
-				}
 
 				const resourceLookups: Record<string, any> = {};
 
@@ -113,44 +71,84 @@ async function legacy() {
 					}
 				}
 
-				recurseResources(resourceLookups, schema, raml, "", version);
+				const shortname = name.endsWith("API")
+					? name.slice(0, -3)
+					: name;
 
-				await fs.writeFile(
-					outPath,
-					JSON.stringify(schema, undefined, 4),
+				const schemaPaths = {};
+				recurseResources(
+					resourceLookups,
+					schemaPaths,
+					raml,
+					"",
+					version,
+					shortname,
 				);
-				cp.execSync(
-					`openapi-generator-cli generate -i ${outPath} -o ${genPath} -g typescript-fetch -p supportsES6=true`,
-				);
+
+				const prefixIndex = raml.baseUri.indexOf("/x-nmos/");
+				if (prefixIndex === -1)
+					throw new Error("No /x-nmos/ in `baseUri`");
+				const prefix = raml.baseUri
+					.slice(prefixIndex + 7)
+					.replace("{version}", version);
+
+				for (const [p, obj] of Object.entries(schemaPaths)) {
+					rootSchema.paths[path.join(prefix, p)] = obj;
+				}
 			}
+
+			const rootSchemaPath = path.join(
+				generatedBasePath,
+				standard,
+				version,
+				"openapi.json",
+			);
+
+			await fs.writeFile(
+				rootSchemaPath,
+				JSON.stringify(rootSchema, undefined, 4),
+			);
+
+			const genPath = path.join(
+				generatedBasePath,
+				standard,
+				version,
+				"NameHere",
+			);
+
+			cp.execSync(
+				`openapi-generator-cli generate -i ${rootSchemaPath} -o ${genPath} -g typescript-fetch -p supportsES6=true`,
+			);
 		}
 	}
 }
 
 function recurseResources(
 	resourceLookups: Record<string, any>,
-	schema: any,
+	schemaPaths: any,
 	resources: any[],
 	path: string = "/",
 	version: string,
+	name: string,
 ) {
 	for (const [id, resource] of Object.entries(resources)) {
 		// TODO - listMethods has some overlap, and we want to ensure we don't miss any keys
 		if (!id.startsWith("/")) continue;
 
-		if (schema.paths[id])
+		if (schemaPaths[id])
 			throw new Error(`Resouce ${id} has already been defined!`);
-		const resourceSchema = (schema.paths[id] = {});
+		const resourceSchema = (schemaPaths[id] = {});
 
-		listMethods(resourceLookups, resourceSchema, resource);
+		listMethods(resourceLookups, resourceSchema, resource, name);
 
 		if (resource) {
 			recurseResources(
 				resourceLookups,
-				schema,
+				schemaPaths,
 				resource,
 				path + id,
 				version,
+				name,
 			);
 		}
 	}
@@ -160,6 +158,7 @@ function listMethods(
 	resourceLookups: Record<string, any>,
 	resourceSchema: any,
 	methods: any,
+	name: string,
 ) {
 	const methodNames = [
 		"get",
@@ -181,6 +180,7 @@ function listMethods(
 		const methodSchema: any = (resourceSchema[methodName] = {});
 		methodSchema.summary = method.description;
 		methodSchema.responses = {};
+		methodSchema.tags = [name];
 
 		for (const [code, response] of Object.entries<any>(method.responses)) {
 			if (!response) {
