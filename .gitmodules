@@ -1,0 +1,24 @@
+[submodule "submodules/is-04/v1.0"]
+	path = submodules/is-04/v1.0
+	url = https://github.com/AMWA-TV/is-04.git
+	branch = v1.0.x
+[submodule "submodules/is-04/v1.1"]
+	path = submodules/is-04/v1.1
+	url = https://github.com/AMWA-TV/is-04.git
+	branch = v1.1.x
+[submodule "submodules/is-04/v1.2"]
+	path = submodules/is-04/v1.2
+	url = https://github.com/AMWA-TV/is-04.git
+	branch = v1.2.x
+[submodule "submodules/is-04/v1.3"]
+	path = submodules/is-04/v1.3
+	url = https://github.com/AMWA-TV/is-04.git
+	branch = v1.3.x
+[submodule "submodules/is-05/v1.0"]
+	path = submodules/is-05/v1.0
+	url = https://github.com/AMWA-TV/is-05.git
+	branch = v1.0.x
+[submodule "submodules/is-05/v1.1"]
+	path = submodules/is-05/v1.1
+	url = https://github.com/AMWA-TV/is-05.git
+	branch = v1.1.x
