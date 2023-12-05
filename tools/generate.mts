@@ -4,15 +4,21 @@ import { rimraf } from "rimraf";
 import { fileURLToPath } from "url";
 import * as cp from "child_process";
 import fs from "fs-extra";
+import { Generator } from "./Generator2.mjs";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 const generatedBasePath = path.join(__dirname, "../src/generated");
 const openapiBasePath = path.join(__dirname, "../openapi");
 
+const generatedBasePath2 = path.join(__dirname, "../src/generated2");
+
 async function legacy() {
 	// Delete previous generation
 	await rimraf(generatedBasePath).catch(() => null);
 	await fs.mkdir(generatedBasePath, { recursive: true });
+
+	await rimraf(generatedBasePath2).catch(() => null);
+	await fs.mkdir(generatedBasePath2, { recursive: true });
 
 	const standards = ["is-04", "is-05"];
 
@@ -28,6 +34,22 @@ async function legacy() {
 			await fs.mkdir(openapiPath, {
 				recursive: true,
 			});
+
+			if (version != "v1.3") continue;
+
+			await new Generator(
+				path.join(
+					__dirname,
+					"..",
+					"submodules",
+					standard,
+					version,
+					"APIs",
+				),
+				path.join(generatedBasePath2, standard, version),
+			).run();
+
+			// return;
 
 			// Copy json schema fragments
 			await fs.copy(

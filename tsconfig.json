@@ -8,6 +8,8 @@
 	],
 	"compilerOptions": {
 		"outDir": "./build",
-		"importHelpers": false
+		"importHelpers": false,
+		"skipLibCheck": true,
+		"lib": ["dom"]
 	}
 }
