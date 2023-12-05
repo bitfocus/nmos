@@ -14,8 +14,11 @@ export class ApiGenerator {
 
 		const prefixIndex = raml.baseUri.indexOf("/x-nmos/");
 		if (prefixIndex === -1) throw new Error("No /x-nmos/ in `baseUri`");
-		const prefix = raml.baseUri.slice(prefixIndex + 7);
-		// .replace("{version}", version); // TODO
+		const version = raml.version;
+		const prefix = raml.baseUri
+			.slice(prefixIndex + 7)
+			.replace("{version}", version);
+
 		lines.push(...(await this.#processResources(prefix, "", raml)));
 
 		// TODO
@@ -49,7 +52,6 @@ export class ApiGenerator {
 				`{${match[1]}}`,
 				`${keyword} ${match[1]}`,
 			);
-			// console.log("m", match);
 		}
 
 		for (const [id, resource] of Object.entries(ramlResources)) {
@@ -65,7 +67,7 @@ export class ApiGenerator {
 			} else if (HTTP_VERBS.includes(id)) {
 				lines.push(
 					...(await this.#processMethod(
-						pathPrefix,
+						uriPrefix + pathPrefix,
 						methodName,
 						id,
 						{ ...ramlResources.uriParameters },
@@ -99,16 +101,14 @@ export class ApiGenerator {
 		uriParameters: any,
 		resource: any,
 	): Promise<string[]> {
+		// Note: equivalent to listMethods
 		const lines: string[] = [];
 
 		// TODO - handle traits
 		// TODO - handle queryParameters
-		// TODO - responses
 		// TODO - type
-		console.log("TODO method", uriPath, verb);
-		// TODO - equivalent to listMethods
+
 		const methodName = camelcase(`${displayName} ${verb}`);
-		const returnType = "any";
 
 		let paramsReplace = "";
 		let methodArgs: string[] = [];
@@ -143,14 +143,24 @@ export class ApiGenerator {
 			paramsReplace += `.replace("{${id}}", ${id})`;
 			methodArgs.push(`${id}: ${type}`);
 
-			// TODO
-			// methodGuards.push(`if () {}`)
+			methodGuards.push(
+				`if (${id} === null || ${id} === undefined) {`,
+				`\tthrow new runtime.RequiredError('${id}', 'Required parameter ${id} was null or undefined when calling ${methodName}.');`,
+				`}`,
+				"",
+			);
+		}
+
+		let returnType: any;
+		// TODO - error responses?
+		if (resource.responses[200]) {
+			returnType = "unknown"; //
 		}
 
 		lines.push(
 			`public async ${methodName}(${methodArgs.join(
 				", ",
-			)}): Promise<${returnType}> {`,
+			)}): Promise<runtime.ApiResponse<${returnType ?? "void"}>> {`,
 			...methodGuards.map((l) => `\t${l}`),
 			"\tconst queryParameters: any = {};",
 			"\tconst headerParameters: runtime.HTTPHeaders = {};",
@@ -161,15 +171,14 @@ export class ApiGenerator {
 			"\t\tquery: queryParameters,",
 			// "\t}, initOverrides);",
 			"\t}, {});",
-			"\treturn new runtime.JSONApiResponse(response);",
+			returnType
+				? "\treturn new runtime.JSONApiResponse(response);"
+				: "\treturn new runtime.VoidApiResponse(response);",
 			// "\treturn new runtime.JSONApiResponse(response, (jsonValue) => Blueprint200ResponseFromJSON(jsonValue));", // TODO
 			"}",
 			"",
 		);
 
-		//  if (requestParameters.blueprintId === null || requestParameters.blueprintId === undefined) {
-		//     throw new runtime.RequiredError('blueprintId','Required parameter requestParameters.blueprintId was null or undefined when calling blueprint.');
-		// }
 		return lines.map((l) => `\t${l}`);
 	}
 }

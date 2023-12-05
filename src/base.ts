@@ -468,6 +468,22 @@ export class JSONApiResponse<T> {
 	}
 }
 
+export class VoidApiResponse {
+	constructor(public raw: Response) {}
+
+	async value(): Promise<void> {
+		return undefined;
+	}
+}
+
+// export class BlobApiResponse {
+// 	constructor(public raw: Response) {}
+
+// 	async value(): Promise<Blob> {
+// 		return await this.raw.blob();
+// 	}
+// }
+
 // export class TextApiResponse {
 // 	constructor(public raw: Response) {}
 
