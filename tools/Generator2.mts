@@ -6,7 +6,6 @@ import path from "path";
 import cp from "child_process";
 import { readRamlFile2 } from "./lib.mjs";
 import { ApiGenerator } from "./ApiGenerator.mjs";
-import camelcase from "camelcase";
 
 export const HTTP_VERBS = [
 	"get",
@@ -108,7 +107,7 @@ export class Generator {
 
 		await fs.writeFile(
 			path.join(this.destPath, `${name}.ts`),
-			lines.join("\n"),
+			[...apiGenerator.typeDefinitionLines, ...lines].join("\n"),
 		);
 
 		return name;

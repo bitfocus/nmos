@@ -1,7 +1,9 @@
-import camelcase from "camelcase";
+import * as changeCase from "change-case";
 import { HTTP_VERBS } from "./Generator2.mjs";
 
 export class ApiGenerator {
+	public typeDefinitionLines: string[] = [];
+
 	constructor(public readonly schemaResources: Map<string, string>) {}
 
 	public async generate(name: string, raml: any): Promise<string[]> {
@@ -23,7 +25,6 @@ export class ApiGenerator {
 
 		lines.push(...(await this.#processResources(prefix, "", raml)));
 
-		// TODO
 		lines.push(`}`);
 
 		return lines;
@@ -39,7 +40,7 @@ export class ApiGenerator {
 
 		let methodName =
 			ramlResources.displayName ||
-			camelcase(pathPrefix.replace(/\//g, " "));
+			changeCase.camelCase(pathPrefix.replace(/\//g, " "));
 
 		for (const match of methodName.matchAll(/{(\w+)}/g)) {
 			let keyword: string;
@@ -57,7 +58,6 @@ export class ApiGenerator {
 		}
 
 		for (const [id, resource] of Object.entries(ramlResources)) {
-			// TODO - listMethods has some overlap, and we want to ensure we don't miss any keys
 			if (id.startsWith("/")) {
 				lines.push(
 					...(await this.#processResources(
@@ -107,15 +107,15 @@ export class ApiGenerator {
 		const lines: string[] = [];
 
 		// TODO - handle traits
-		// TODO - handle queryParameters
 		// TODO - type
+		// TODO - body
 
 		let docs = [];
 		if (resource.description) {
 			docs.push(resource.description.split("\n"));
 		}
 
-		const methodName = camelcase(`${displayName} ${verb}`);
+		const methodName = changeCase.camelCase(`${displayName} ${verb}`);
 
 		let paramsReplace = "";
 		let methodArgs: string[] = [];
@@ -143,6 +143,36 @@ export class ApiGenerator {
 			docs.push(
 				`@param ${id} ${param.description || param.displayName || ""}`,
 			);
+		}
+
+		const hasQuery =
+			resource.queryParameters &&
+			Object.keys(resource.queryParameters).length > 0;
+		if (hasQuery) {
+			const queryType = changeCase.pascalCase(`Query ${methodName}`);
+			methodArgs.push(`queryParameters?: ${queryType}`);
+
+			this.typeDefinitionLines.push(`export interface ${queryType} {`);
+
+			for (const [key, param] of Object.entries<any>(
+				resource.queryParameters,
+			)) {
+				if (param) {
+					let paramType = param.type ?? "any";
+					if (paramType.enum) {
+						paramType = paramType.enum
+							.map((v: any) => `"${v}"`)
+							.join(" | ");
+					}
+
+					this.typeDefinitionLines.push(`\t${key}?: ${paramType}`);
+				} else {
+					// No type info
+					this.typeDefinitionLines.push(`\t${key}?: any`);
+				}
+			}
+
+			this.typeDefinitionLines.push("}", "");
 		}
 
 		let returnType: string | undefined;
@@ -175,21 +205,25 @@ export class ApiGenerator {
 			docs = ["/**", ...docs.map((l) => ` * ${l}`), "**/"];
 		}
 
+		methodArgs.push(
+			`initOverrides?: RequestInit | runtime.InitOverrideFunction`,
+		);
+
 		lines.push(
 			...docs,
 			`public async ${methodName}(${methodArgs.join(
 				", ",
 			)}): Promise<runtime.ApiResponse<${returnType ?? "void"}>> {`,
 			...methodGuards.map((l) => `\t${l}`),
-			"\tconst queryParameters: any = {};",
 			"\tconst headerParameters: runtime.HTTPHeaders = {};",
 			"\tconst response = await this.request({",
 			`\t\tpath: '${uriPath}'${paramsReplace},`,
 			`\t\tmethod: '${verb.toUpperCase()}',`,
 			"\t\theaders: headerParameters,",
-			"\t\tquery: queryParameters,",
-			// "\t}, initOverrides);",
-			"\t}, {});",
+			hasQuery
+				? "\t\tquery: (queryParameters || {}) as any,"
+				: "\t\tquery: {},",
+			"\t}, initOverrides);",
 			returnType
 				? "\treturn new runtime.JSONApiResponse(response);"
 				: "\treturn new runtime.VoidApiResponse(response);",
