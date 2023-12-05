@@ -54,6 +54,12 @@ export class ApiGenerator {
 			);
 		}
 
+		const fallbackUriParameters: Record<string, any> = {};
+		for (const match of pathPrefix.matchAll(/{(\w+)}/g)) {
+			// is-05 is missing some value definitions
+			fallbackUriParameters[match[1]] = { type: "string" };
+		}
+
 		for (const [id, resource] of Object.entries(ramlResources)) {
 			if (id.startsWith("/")) {
 				lines.push(
@@ -69,7 +75,10 @@ export class ApiGenerator {
 						uriPrefix + pathPrefix,
 						methodName,
 						id,
-						{ ...ramlResources.uriParameters },
+						{
+							...fallbackUriParameters,
+							...ramlResources.uriParameters,
+						},
 						resource,
 					)),
 				);
@@ -125,7 +134,7 @@ export class ApiGenerator {
 					throw new Error("Bad param type");
 			}
 
-			paramsReplace += `.replace("{${id}}", ${id})`;
+			paramsReplace += `.replace("{${id}}", encodeURIComponent(String(${id})))`;
 			methodArgs.push(`${id}: ${type}`);
 
 			methodGuards.push(
@@ -243,6 +252,7 @@ export class ApiGenerator {
 			// TODO - this should also be reflected in the response type?
 			const trait = this.traits["paged"];
 			for (const [key, value] of Object.entries<any>(trait)) {
+				// TODO
 			}
 		}
 
