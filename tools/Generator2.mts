@@ -4,6 +4,7 @@ import { generateName } from "json-schema-to-typescript/dist/src/utils.js";
 import path from "path";
 import { readRamlFile } from "./lib.mjs";
 import { ApiGenerator } from "./ApiGenerator.mjs";
+import * as changeCase from "change-case";
 
 export const HTTP_VERBS = [
 	"get",
@@ -23,14 +24,14 @@ export class Generator {
 		private readonly destPath: string,
 	) {}
 
-	public async run(): Promise<void> {
+	public async run(version: string): Promise<void> {
 		await fs.mkdir(this.destPath, { recursive: true });
 
-		const schemaTypes = await this.#compileSchemas();
+		const schemaTypes = await this.#compileSchemas(version);
 		await this.#generateApis(schemaTypes);
 	}
 
-	async #compileSchemas(): Promise<Map<string, string>> {
+	async #compileSchemas(version: string): Promise<Map<string, string>> {
 		const typeNames = new Map<string, string>();
 
 		const schemas: string[] = [];
@@ -52,7 +53,17 @@ export class Generator {
 
 			schemas.push(schema);
 
-			if (!schemaJson.title) {
+			let title = schemaJson.title;
+			if (!title) {
+				title = path.parse(file).name;
+				if (title.endsWith("-schema")) title = title.slice(0, -7);
+				if (title.startsWith(version))
+					title = title.slice(version.length + 1);
+
+				title = changeCase.pascalCase(title);
+			}
+
+			if (!title) {
 				throw new Error(`Schema is missing title: ${file}`);
 			}
 			typeNames.set(
@@ -110,7 +121,7 @@ export class Generator {
 			}
 		}
 
-		const apiGenerator = new ApiGenerator(localResources);
+		const apiGenerator = new ApiGenerator(localResources, raml.traits);
 
 		const lines = [
 			`/* eslint-disable */`,

@@ -22,8 +22,6 @@ async function legacy() {
 		for (const version of versions) {
 			console.log(`Generating ${standard} - ${version}`);
 
-			if (version != "v1.3") continue;
-
 			await new Generator(
 				path.join(
 					__dirname,
@@ -34,7 +32,7 @@ async function legacy() {
 					"APIs",
 				),
 				path.join(generatedBasePath, standard, version),
-			).run();
+			).run(version);
 
 			const filePath = path.join(".", standard, version, "index.js");
 			const exportName = `${standard.replace(

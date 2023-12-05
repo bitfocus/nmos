@@ -4,7 +4,10 @@ import { HTTP_VERBS } from "./Generator2.mjs";
 export class ApiGenerator {
 	public typeDefinitionLines: string[] = [];
 
-	constructor(public readonly schemaResources: Map<string, string>) {}
+	constructor(
+		public readonly schemaResources: Map<string, string>,
+		private readonly traits: any = {},
+	) {}
 
 	public async generate(name: string, raml: any): Promise<string[]> {
 		const lines = [];
@@ -30,7 +33,6 @@ export class ApiGenerator {
 		pathPrefix: string,
 		ramlResources: any,
 	): Promise<string[]> {
-		// Note: equivalent to `recurseResources`
 		const lines: string[] = [];
 
 		let methodName =
@@ -80,7 +82,8 @@ export class ApiGenerator {
 				id === "documentation" ||
 				id === "traits" ||
 				id === "displayName" ||
-				id === "uriParameters"
+				id === "uriParameters" ||
+				id === "description"
 			) {
 				// Ignore other raml properties
 			} else {
@@ -98,7 +101,6 @@ export class ApiGenerator {
 		uriParameters: any,
 		resource: any,
 	): Promise<string[]> {
-		// Note: equivalent to listMethods
 		const lines: string[] = [];
 
 		// TODO - handle traits
@@ -203,7 +205,7 @@ export class ApiGenerator {
 
 		let returnType: string | undefined;
 		// TODO - error responses?
-		if (resource.responses[200]) {
+		if (resource.responses[200] && resource.responses[200].body) {
 			const responseInfo = resource.responses[200].body;
 			if (typeof responseInfo.type === "string") {
 				const newType = this.schemaResources.get(responseInfo.type);
@@ -236,6 +238,13 @@ export class ApiGenerator {
 		const hasRql = resource.is?.includes("rql");
 		const hasDowngrade = resource.is?.includes("downgrade");
 		const hasAncestry = resource.is?.includes("ancestry");
+
+		if (hasPagination) {
+			// TODO - this should also be reflected in the response type?
+			const trait = this.traits["paged"];
+			for (const [key, value] of Object.entries<any>(trait)) {
+			}
+		}
 
 		if (docs.length > 0) {
 			docs = ["/**", ...docs.map((l) => ` * ${l}`), "**/"];
