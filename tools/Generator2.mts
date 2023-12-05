@@ -1,10 +1,12 @@
 import * as fs from "fs/promises";
-import { compileFromFile } from "json-schema-to-typescript";
+import { compile, compileFromFile } from "json-schema-to-typescript";
+import { generateName } from "json-schema-to-typescript/dist/src/utils.js";
 import { bundle } from "@apidevtools/json-schema-ref-parser";
 import path from "path";
 import cp from "child_process";
 import { readRamlFile2 } from "./lib.mjs";
 import { ApiGenerator } from "./ApiGenerator.mjs";
+import camelcase from "camelcase";
 
 export const HTTP_VERBS = [
 	"get",
@@ -27,26 +29,39 @@ export class Generator {
 	public async run(): Promise<void> {
 		await fs.mkdir(this.destPath, { recursive: true });
 
-		await this.#compileSchemas();
-		await this.#generateApis();
+		const schemaTypes = await this.#compileSchemas();
+		await this.#generateApis(schemaTypes);
 	}
 
-	async #compileSchemas(): Promise<void> {
+	async #compileSchemas(): Promise<Map<string, string>> {
+		const typeNames = new Map<string, string>();
+
 		const schemas: string[] = [];
 		const files = await fs.readdir(path.join(this.sourcePath, "schemas"));
 		for (const file of files) {
 			if (!file.endsWith(".json")) continue;
 
-			const schema = await compileFromFile(
+			const schemaJsonStr = await fs.readFile(
 				path.join(this.sourcePath, "schemas", file),
-				{
-					cwd: path.join(this.sourcePath, "schemas"),
-					declareExternallyReferenced: false,
-					additionalProperties: false,
-				},
 			);
+			const schemaJson = JSON.parse(schemaJsonStr.toString());
+
+			const schema = await compile(schemaJson, file, {
+				cwd: path.join(this.sourcePath, "schemas"),
+				declareExternallyReferenced: false,
+				additionalProperties: false,
+				ignoreMinAndMaxItems: true,
+			});
 
 			schemas.push(schema);
+
+			if (!schemaJson.title) {
+				throw new Error(`Schema is missing title: ${file}`);
+			}
+			typeNames.set(
+				`schemas/${file}`,
+				generateName(schemaJson.title, new Set()),
+			);
 		}
 
 		// TODO - parse ts and stip out duplicates
@@ -55,16 +70,18 @@ export class Generator {
 			path.join(this.destPath, "schemas.ts"),
 			schemas.join("\n\n"),
 		);
+
+		return typeNames;
 	}
 
-	async #generateApis(): Promise<void> {
+	async #generateApis(schemaTypes: Map<string, string>): Promise<void> {
 		const names: string[] = [];
 
 		const files = await fs.readdir(this.sourcePath);
 		for (const file of files) {
 			if (!file.endsWith(".raml")) continue;
 
-			const name = await this.#generateApi(file);
+			const name = await this.#generateApi(schemaTypes, file);
 			names.push(name);
 		}
 
@@ -78,12 +95,15 @@ export class Generator {
 		);
 	}
 
-	async #generateApi(filename: string): Promise<string> {
+	async #generateApi(
+		schemaResources: Map<string, string>,
+		filename: string,
+	): Promise<string> {
 		const name = path.parse(filename).name;
 
 		const raml = await readRamlFile2(path.join(this.sourcePath, filename));
 
-		const apiGenerator = new ApiGenerator();
+		const apiGenerator = new ApiGenerator(schemaResources);
 		const lines = await apiGenerator.generate(name, raml);
 
 		await fs.writeFile(

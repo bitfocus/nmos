@@ -2,6 +2,8 @@ import camelcase from "camelcase";
 import { HTTP_VERBS } from "./Generator2.mjs";
 
 export class ApiGenerator {
+	constructor(public readonly schemaResources: Map<string, string>) {}
+
 	public async generate(name: string, raml: any): Promise<string[]> {
 		const lines = [
 			`/* eslint-disable */`,
@@ -108,6 +110,11 @@ export class ApiGenerator {
 		// TODO - handle queryParameters
 		// TODO - type
 
+		let docs = [];
+		if (resource.description) {
+			docs.push(resource.description.split("\n"));
+		}
+
 		const methodName = camelcase(`${displayName} ${verb}`);
 
 		let paramsReplace = "";
@@ -118,23 +125,6 @@ export class ApiGenerator {
 			switch (param.type) {
 				case "string":
 					type = "string";
-					// assertKnownKeys(param, [
-					// 	// Parser builtin:
-					// 	"displayName",
-					// 	"key",
-					// 	"required",
-					// 	"typePropertyKind",
-					// 	// Useful:
-					// 	"name",
-					// 	"type",
-					// 	"pattern",
-					// 	"enum",
-					// ]);
-					// schema = {
-					// 	type: "string",
-					// 	pattern: param.pattern,
-					// 	enum: param.enum,
-					// };
 					break;
 				default:
 					throw new Error("Bad param type");
@@ -149,15 +139,44 @@ export class ApiGenerator {
 				`}`,
 				"",
 			);
+
+			docs.push(
+				`@param ${id} ${param.description || param.displayName || ""}`,
+			);
 		}
 
-		let returnType: any;
+		let returnType: string | undefined;
 		// TODO - error responses?
 		if (resource.responses[200]) {
-			returnType = "unknown"; //
+			const responseInfo = resource.responses[200].body;
+			if (typeof responseInfo.type === "string") {
+				// TODO
+				returnType = "unknown"; //
+			} else if (responseInfo.type.type === "!include") {
+				const newType = this.schemaResources.get(
+					responseInfo.type.data,
+				);
+				if (!newType) {
+					throw new Error(
+						`Schema not loaded for API: ${responseInfo.type.data}`,
+					);
+				}
+				returnType = `schemas.${newType}`;
+			} else {
+				throw new Error(
+					`Unsupported response contents: ${JSON.stringify(
+						responseInfo,
+					)}`,
+				);
+			}
+		}
+
+		if (docs.length > 0) {
+			docs = ["/**", ...docs.map((l) => ` * ${l}`), "**/"];
 		}
 
 		lines.push(
+			...docs,
 			`public async ${methodName}(${methodArgs.join(
 				", ",
 			)}): Promise<runtime.ApiResponse<${returnType ?? "void"}>> {`,
