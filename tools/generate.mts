@@ -38,7 +38,7 @@ async function legacy() {
 			const exportName = `${standard.replace(
 				/\W+/g,
 				"",
-			)}_${version.replace(/\D+/g, "")}`;
+			)}_v${version.replace(/\D+/g, "")}`;
 			paths.push(`export * as ${exportName} from './${filePath}'`);
 		}
 
