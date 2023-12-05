@@ -2,5 +2,4 @@ build/
 node_modules/
 yarn-error.log
 src/generated/
-/openapi
 /scratch

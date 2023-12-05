@@ -1,9 +1,7 @@
 import * as fs from "fs/promises";
-import { compile, compileFromFile } from "json-schema-to-typescript";
+import { compile } from "json-schema-to-typescript";
 import { generateName } from "json-schema-to-typescript/dist/src/utils.js";
-import { bundle } from "@apidevtools/json-schema-ref-parser";
 import path from "path";
-import cp from "child_process";
 import { readRamlFile } from "./lib.mjs";
 import { ApiGenerator } from "./ApiGenerator.mjs";
 

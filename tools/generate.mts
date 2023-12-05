@@ -2,7 +2,7 @@ import { getVersions } from "./lib.mjs";
 import path from "path";
 import { rimraf } from "rimraf";
 import { fileURLToPath } from "url";
-import fs from "fs-extra";
+import fs from "fs/promises";
 import { Generator } from "./Generator2.mjs";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
