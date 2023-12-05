@@ -80,3 +80,10 @@ export async function readRamlFile(
 
 	return yaml.load(str.toString(), { schema: SCHEMA });
 }
+
+// Read a RAML file from ./submodules/{standard}/{version}/APIs/{file} and parse it. It's yaml.
+export async function readRamlFile2(fullPath: string): Promise<any> {
+	const str = await fs.readFile(fullPath, "utf8");
+
+	return yaml.load(str.toString(), { schema: SCHEMA });
+}

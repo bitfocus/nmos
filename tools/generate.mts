@@ -139,9 +139,9 @@ async function legacy() {
 			const genPath = path.join(generatedBasePath, standard, version);
 			console.log(`Compiling ${rootSchemaPath} to ${genPath}`);
 
-			cp.execSync(
-				`openapi-generator-cli generate -i ${rootSchemaPath} -o ${genPath} -g typescript-fetch -p supportsES6=true`,
-			);
+			// cp.execSync(
+			// 	`openapi-generator-cli generate -i ${rootSchemaPath} -o ${genPath} -g typescript-fetch -p supportsES6=true`,
+			// );
 		}
 	}
 }
