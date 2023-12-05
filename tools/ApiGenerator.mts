@@ -7,12 +7,7 @@ export class ApiGenerator {
 	constructor(public readonly schemaResources: Map<string, string>) {}
 
 	public async generate(name: string, raml: any): Promise<string[]> {
-		const lines = [
-			`/* eslint-disable */`,
-			`import * as runtime from '../../../base.js'`,
-			`import * as schemas from './schemas.js'`,
-			"",
-		];
+		const lines = [];
 
 		lines.push(`export class ${name} extends runtime.BaseAPI {`);
 
@@ -247,7 +242,7 @@ export class ApiGenerator {
 			`\t\tpath: '${uriPath}'${paramsReplace},`,
 			`\t\tmethod: '${verb.toUpperCase()}',`,
 			"\t\theaders: headerParameters,",
-			hasBody ? "\t\tbody: body || {}," : "",
+			hasBody ? "\t\tbody: body || {}," : "", // TODO sanitise?
 			hasQuery
 				? "\t\tquery: (queryParameters || {}) as any,"
 				: "\t\tquery: {},",
@@ -255,7 +250,7 @@ export class ApiGenerator {
 			returnType
 				? "\treturn new runtime.JSONApiResponse(response);"
 				: "\treturn new runtime.VoidApiResponse(response);",
-			// "\treturn new runtime.JSONApiResponse(response, (jsonValue) => Blueprint200ResponseFromJSON(jsonValue));", // TODO
+			// "\treturn new runtime.JSONApiResponse(response, (jsonValue) => Blueprint200ResponseFromJSON(jsonValue));", // TODO sanitise?
 			"}",
 			"",
 		);

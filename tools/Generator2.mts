@@ -103,11 +103,20 @@ export class Generator {
 		const raml = await readRamlFile2(path.join(this.sourcePath, filename));
 
 		const apiGenerator = new ApiGenerator(schemaResources);
-		const lines = await apiGenerator.generate(name, raml);
+
+		const lines = [
+			`/* eslint-disable */`,
+			`import * as runtime from '../../../base.js'`,
+			`import * as schemas from './schemas.js'`,
+			"",
+		];
+
+		const classLines = await apiGenerator.generate(name, raml);
+		lines.push(...apiGenerator.typeDefinitionLines, ...classLines);
 
 		await fs.writeFile(
 			path.join(this.destPath, `${name}.ts`),
-			[...apiGenerator.typeDefinitionLines, ...lines].join("\n"),
+			lines.join("\n"),
 		);
 
 		return name;
