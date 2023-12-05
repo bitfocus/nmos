@@ -123,6 +123,7 @@ export class ApiGenerator {
 
 		let paramsReplace = "";
 		let methodArgs: string[] = [];
+		let methodArgsNames: string[] = [];
 		let methodGuards: string[] = [];
 		for (const [id, param] of Object.entries<any>(uriParameters)) {
 			let type: string;
@@ -136,6 +137,7 @@ export class ApiGenerator {
 
 			paramsReplace += `.replace("{${id}}", encodeURIComponent(String(${id})))`;
 			methodArgs.push(`${id}: ${type}`);
+			methodArgsNames.push(id);
 
 			methodGuards.push(
 				`if (${id} === null || ${id} === undefined) {`,
@@ -179,6 +181,7 @@ export class ApiGenerator {
 			}
 
 			methodArgs.push(`body: ${bodyType}`);
+			methodArgsNames.push("body");
 		}
 
 		const hasQuery =
@@ -187,6 +190,7 @@ export class ApiGenerator {
 		if (hasQuery) {
 			const queryType = changeCase.pascalCase(`Query ${methodName}`);
 			methodArgs.push(`queryParameters?: ${queryType}`);
+			methodArgsNames.push("queryParameters");
 
 			this.typeDefinitionLines.push(`export interface ${queryType} {`);
 
@@ -263,10 +267,11 @@ export class ApiGenerator {
 		methodArgs.push(
 			`initOverrides?: RequestInit | runtime.InitOverrideFunction`,
 		);
+		methodArgsNames.push("initOverrides");
 
 		lines.push(
 			...docs,
-			`public async ${methodName}(${methodArgs.join(
+			`public async ${methodName}Raw (${methodArgs.join(
 				", ",
 			)}): Promise<runtime.ApiResponse<${returnType ?? "void"}>> {`,
 			...methodGuards.map((l) => `\t${l}`),
@@ -284,6 +289,19 @@ export class ApiGenerator {
 				? "\treturn new runtime.JSONApiResponse(response);"
 				: "\treturn new runtime.VoidApiResponse(response);", // TODO - wrap result for pagination headers?
 			// "\treturn new runtime.JSONApiResponse(response, (jsonValue) => Blueprint200ResponseFromJSON(jsonValue));", // TODO sanitise?
+			"}",
+			"",
+		);
+
+		lines.push(
+			...docs,
+			`public async ${methodName} (${methodArgs.join(", ")}): Promise<${
+				returnType ?? "void"
+			}> {`,
+			`\tconst response = await this.${methodName}Raw(${methodArgsNames.join(
+				", ",
+			)});`,
+			"\treturn await response.value();",
 			"}",
 			"",
 		);
