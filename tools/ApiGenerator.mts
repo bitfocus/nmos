@@ -108,7 +108,6 @@ export class ApiGenerator {
 
 		// TODO - handle traits
 		// TODO - type
-		// TODO - body
 
 		let docs = [];
 		if (resource.description) {
@@ -145,6 +144,33 @@ export class ApiGenerator {
 			);
 		}
 
+		const hasBody = !!resource.body;
+		if (hasBody) {
+			let bodyType = "unknown";
+			if (typeof resource.body.type === "string") {
+				// TODO
+				bodyType = "unknown"; //
+			} else if (resource.body.type.type === "!include") {
+				const newType = this.schemaResources.get(
+					resource.body.type.data,
+				);
+				if (!newType) {
+					throw new Error(
+						`Schema not loaded for API: ${resource.body.type.data}`,
+					);
+				}
+				bodyType = `schemas.${newType}`;
+			} else {
+				throw new Error(
+					`Unsupported response contents: ${JSON.stringify(
+						resource.body,
+					)}`,
+				);
+			}
+
+			methodArgs.push(`body: ${bodyType}`);
+		}
+
 		const hasQuery =
 			resource.queryParameters &&
 			Object.keys(resource.queryParameters).length > 0;
@@ -158,6 +184,7 @@ export class ApiGenerator {
 				resource.queryParameters,
 			)) {
 				if (param) {
+					// TODO - test/verify this route some more
 					let paramType = param.type ?? "any";
 					if (paramType.enum) {
 						paramType = paramType.enum
@@ -220,6 +247,7 @@ export class ApiGenerator {
 			`\t\tpath: '${uriPath}'${paramsReplace},`,
 			`\t\tmethod: '${verb.toUpperCase()}',`,
 			"\t\theaders: headerParameters,",
+			hasBody ? "\t\tbody: body || {}," : "",
 			hasQuery
 				? "\t\tquery: (queryParameters || {}) as any,"
 				: "\t\tquery: {},",
