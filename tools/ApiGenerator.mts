@@ -143,8 +143,13 @@ export class ApiGenerator {
 		if (hasBody) {
 			let bodyType = "unknown";
 			if (typeof resource.body.type === "string") {
-				// TODO
-				bodyType = "unknown"; //
+				const newType = this.schemaResources.get(resource.body.type);
+				if (!newType) {
+					throw new Error(
+						`Schema not loaded for API: ${resource.body.type}`,
+					);
+				}
+				bodyType = `schemas.${newType}`;
 			} else if (resource.body.type.type === "!include") {
 				const newType = this.schemaResources.get(
 					resource.body.type.data,
@@ -202,8 +207,13 @@ export class ApiGenerator {
 		if (resource.responses[200]) {
 			const responseInfo = resource.responses[200].body;
 			if (typeof responseInfo.type === "string") {
-				// TODO
-				returnType = "unknown"; //
+				const newType = this.schemaResources.get(responseInfo.type);
+				if (!newType) {
+					throw new Error(
+						`Schema not loaded for API: ${responseInfo.type}`,
+					);
+				}
+				returnType = `schemas.${newType}`;
 			} else if (responseInfo.type.type === "!include") {
 				const newType = this.schemaResources.get(
 					responseInfo.type.data,

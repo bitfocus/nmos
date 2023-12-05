@@ -102,7 +102,17 @@ export class Generator {
 
 		const raml = await readRamlFile2(path.join(this.sourcePath, filename));
 
-		const apiGenerator = new ApiGenerator(schemaResources);
+		const localResources = new Map<string, string>(
+			schemaResources.entries(),
+		);
+
+		if (raml.types) {
+			for (const [key, value] of Object.entries<any>(raml.types)) {
+				localResources.set(key, localResources.get(value.data)!);
+			}
+		}
+
+		const apiGenerator = new ApiGenerator(localResources);
 
 		const lines = [
 			`/* eslint-disable */`,
