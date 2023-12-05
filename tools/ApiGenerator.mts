@@ -102,7 +102,6 @@ export class ApiGenerator {
 		const lines: string[] = [];
 
 		// TODO - handle traits
-		// TODO - type
 
 		let docs = [];
 		if (resource.description) {
@@ -233,6 +232,11 @@ export class ApiGenerator {
 			}
 		}
 
+		const hasPagination = resource.is?.includes("paged");
+		const hasRql = resource.is?.includes("rql");
+		const hasDowngrade = resource.is?.includes("downgrade");
+		const hasAncestry = resource.is?.includes("ancestry");
+
 		if (docs.length > 0) {
 			docs = ["/**", ...docs.map((l) => ` * ${l}`), "**/"];
 		}
@@ -259,7 +263,7 @@ export class ApiGenerator {
 			"\t}, initOverrides);",
 			returnType
 				? "\treturn new runtime.JSONApiResponse(response);"
-				: "\treturn new runtime.VoidApiResponse(response);",
+				: "\treturn new runtime.VoidApiResponse(response);", // TODO - wrap result for pagination headers?
 			// "\treturn new runtime.JSONApiResponse(response, (jsonValue) => Blueprint200ResponseFromJSON(jsonValue));", // TODO sanitise?
 			"}",
 			"",
