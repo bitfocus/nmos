@@ -4,7 +4,7 @@ import { generateName } from "json-schema-to-typescript/dist/src/utils.js";
 import { bundle } from "@apidevtools/json-schema-ref-parser";
 import path from "path";
 import cp from "child_process";
-import { readRamlFile2 } from "./lib.mjs";
+import { readRamlFile } from "./lib.mjs";
 import { ApiGenerator } from "./ApiGenerator.mjs";
 
 export const HTTP_VERBS = [
@@ -100,7 +100,7 @@ export class Generator {
 	): Promise<string> {
 		const name = path.parse(filename).name;
 
-		const raml = await readRamlFile2(path.join(this.sourcePath, filename));
+		const raml = await readRamlFile(path.join(this.sourcePath, filename));
 
 		const localResources = new Map<string, string>(
 			schemaResources.entries(),
