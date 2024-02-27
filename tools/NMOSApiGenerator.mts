@@ -1,16 +1,29 @@
 import * as changeCase from "change-case";
-import { HTTP_VERBS } from "./Generator2.mjs";
 
-export class ApiGenerator {
+const HTTP_VERBS = [
+	"get",
+	"post",
+	"put",
+	"delete",
+	"head",
+	"options",
+	"trace",
+	"patch",
+	"connect",
+];
+
+/** Generate the types for a portion of a NMOS standard */
+export class NMOSApiGenerator {
 	public typeDefinitionLines: string[] = [];
 
 	constructor(
-		public readonly schemaResources: Map<string, string>,
+		private readonly schemaResources: Map<string, string>,
 		private readonly traits: any = {},
 	) {}
 
+	/** Run the generator */
 	public async generate(name: string, raml: any): Promise<string[]> {
-		const lines = [];
+		const lines: string[] = [];
 
 		lines.push(`export class ${name} extends runtime.BaseAPI {`);
 
@@ -28,6 +41,13 @@ export class ApiGenerator {
 		return lines;
 	}
 
+	/**
+	 * Generate a resource
+	 * @param uriPrefix Prefix for the resource
+	 * @param pathPrefix Path for the resouce
+	 * @param ramlResources RAML to parse
+	 * @returns Typescript code lines
+	 */
 	async #processResources(
 		uriPrefix: string,
 		pathPrefix: string,
@@ -103,11 +123,20 @@ export class ApiGenerator {
 		return lines;
 	}
 
+	/**
+	 * Generate a method
+	 * @param uriPath Path for the method
+	 * @param displayName Name to display for the method
+	 * @param verb HTTP verb of the method
+	 * @param uriParameters URI parameters
+	 * @param resource RAML for the resouce
+	 * @returns Typescript code lines
+	 */
 	async #processMethod(
 		uriPath: string,
 		displayName: string,
 		verb: string,
-		uriParameters: any,
+		uriParameters: Record<string, any>,
 		resource: any,
 	): Promise<string[]> {
 		const lines: string[] = [];

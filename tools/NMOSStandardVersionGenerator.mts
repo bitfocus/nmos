@@ -3,27 +3,20 @@ import { compile } from "json-schema-to-typescript";
 import { generateName } from "json-schema-to-typescript/dist/src/utils.js";
 import path from "path";
 import { readRamlFile } from "./lib.mjs";
-import { ApiGenerator } from "./ApiGenerator.mjs";
+import { NMOSApiGenerator } from "./NMOSApiGenerator.mjs";
 import * as changeCase from "change-case";
 
-export const HTTP_VERBS = [
-	"get",
-	"post",
-	"put",
-	"delete",
-	"head",
-	"options",
-	"trace",
-	"patch",
-	"connect",
-];
-
-export class Generator {
+/** Generate the types for an NMOS standard */
+export class NMOSStandardVersionGenerator {
 	constructor(
 		private readonly sourcePath: string,
 		private readonly destPath: string,
 	) {}
 
+	/**
+	 * Run the generator
+	 * @param version Version number of this standard
+	 */
 	public async run(version: string): Promise<void> {
 		await fs.mkdir(this.destPath, { recursive: true });
 
@@ -31,6 +24,11 @@ export class Generator {
 		await this.#generateApis(schemaTypes);
 	}
 
+	/**
+	 * Compile the typescript schemas to interfaces
+	 * @param version Version number of this standard
+	 * @returns Map of schema types names
+	 */
 	async #compileSchemas(version: string): Promise<Map<string, string>> {
 		const typeNames = new Map<string, string>();
 
@@ -82,6 +80,10 @@ export class Generator {
 		return typeNames;
 	}
 
+	/**
+	 * Compile the api schemas to classes
+	 * @param schemaTypes Map of schema types names
+	 */
 	async #generateApis(schemaTypes: Map<string, string>): Promise<void> {
 		const names: string[] = [];
 
@@ -103,6 +105,11 @@ export class Generator {
 		);
 	}
 
+	/**
+	 * Compile the api schemas to a class
+	 * @param schemaTypes Map of schema types names
+	 * @param filename Filename of the api portion to generate
+	 */
 	async #generateApi(
 		schemaResources: Map<string, string>,
 		filename: string,
@@ -121,7 +128,7 @@ export class Generator {
 			}
 		}
 
-		const apiGenerator = new ApiGenerator(localResources, raml.traits);
+		const apiGenerator = new NMOSApiGenerator(localResources, raml.traits);
 
 		const lines = [
 			`/* eslint-disable */`,
