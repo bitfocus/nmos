@@ -10,7 +10,7 @@
 		"dev": "DEBUG_WRITE_TO_FILE=1  nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/main.ts",
 		"submodules": "git submodule init && git submodule update",
 		"release": "release-it",
-		"tool:generate": "bun ./tools/generate.ts"
+		"tool:generate": "node --loader ts-node/esm ./tools/generate.mts"
 	},
 	"repository": {
 		"type": "git",
@@ -41,18 +41,19 @@
 	"homepage": "https://github.com/bitfocus/nmos#readme",
 	"devDependencies": {
 		"@tsconfig/node18": "^18.2.2",
+		"@types/js-yaml": "^4.0.9",
 		"@types/node": "^18.18.14",
+		"change-case": "^5.2.0",
+		"js-yaml": "^4.1.0",
 		"json-schema-to-typescript": "^13.1.1",
 		"nodemon": "^3.0.1",
 		"prettier": "^3.1.0",
-		"release-it": "15",
 		"rimraf": "^5.0.5",
 		"ts-node": "^10.9.1",
 		"typescript": "~5.2"
 	},
-	"dependencies": {
-		"chalk": "^5.3.0",
-		"raml2obj": "^6.8.1",
-		"yaml": "^2.3.4"
+	"dependencies": {},
+	"engines": {
+		"node": ">=18.18"
 	}
 }
