@@ -1,10 +1,13 @@
 # NMOS
-* Typescript Types for NMOS responses
+* Typescript types response objects
 * Zod validation (strict or not)
 
 ## What does this solve?
-* In a world of full of standard hating NMOSers, this makes sure the responses you are getting complies to the standard (and if they don't, you should probably know about it, so you can handle it another way)
+* In a world filled with those who disregard standards, this ensures the responses you receive comply with the standard. If they don't, you'll be informed, allowing you to handle it appropriately.
 * TypeScript types for a good developer experience
+
+## What is this really?
+AMWAs IS-04 JSON schema files, converted to zod, structured to their respective URLs with an Axios HTTP library to fetch the resources.
 
 ## Install
 Depending on your package manager
@@ -39,3 +42,8 @@ This module currently only support GET requests for IS-04.
 ## Author
 William Viker <william@bitfocus.io>
 Bitfocus AS
+
+## Links
+* [https://specs.amwa.tv/is-04/](https://specs.amwa.tv/is-04/)
+* [https://www.npmjs.com/package/json-schema-to-zod](https://www.npmjs.com/package/json-schema-to-zod)
+* [https://www.npmjs.com/package/json-refs9](https://www.npmjs.com/package/json-refs)
