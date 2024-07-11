@@ -6,4 +6,5 @@ export type NMOSRuntimeOptions = {
 	port: number
 	basePath: string
 	dialect: NMOSDialect
+	strict: boolean
 }
