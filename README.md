@@ -3,7 +3,7 @@
 * Zod validation (strict or not)
 
 ## What does this solve?
-* In a world of full of standard hating NMOSers, this makes sure the responses are getting are valid
+* In a world of full of standard hating NMOSers, this makes sure the responses you are getting complies to the standard (and if they don't, you should probably know about it, so you can handle it another way)
 * TypeScript types for a good developer experience
 
 ## Install
