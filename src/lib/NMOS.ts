@@ -9,7 +9,10 @@ export type EndpointType<T extends EndpointTypes> = z.infer<Endpoints[T]>
 
 export class NMOSRuntime {
 	private runtime: Axios
+	private options: NMOSRuntimeOptions
+
 	constructor(options: NMOSRuntimeOptions) {
+		this.options = options
 		this.runtime = new Axios({
 			baseURL: `${options.protocol}://${options.host}:${options.port}${options.basePath}`,
 			timeout: 1000,
@@ -34,16 +37,20 @@ export class NMOSRuntime {
 					result.data = JSON.parse(result.data)
 				} catch (error) {
 					console.error(error)
-					throw new Error('Failed to parse response')
+					throw new Error('Failed to parse JSON')
 				}
 			}
-
-			if (await endpoint.parseAsync(result.data)) {
-				console.log('Valid')
-			} else {
-				console.log('Not valid')
+			try {
+				const parse = await endpoint.parseAsync(result.data)
+				return result.data
+			} catch (error) {
+				console.error('Schema validation failed', error)
+				if (this.options.strict) {
+					throw new Error('Strict mode enabled, failed to parse data')
+				}
 			}
 			return result.data
+			
 		} catch (error) {
 			console.error(error)
 		}
@@ -57,6 +64,7 @@ export class NMOS extends NMOSRuntime {
 		host = '127.0.0.1',
 		port = 80,
 		basePath = '/x-nmos',
+		strict = true,
 	}: Partial<NMOSRuntimeOptions>) {
 		super({
 			dialect,
@@ -64,6 +72,7 @@ export class NMOS extends NMOSRuntime {
 			host,
 			port,
 			basePath,
+			strict,
 		})
 	}
 }
