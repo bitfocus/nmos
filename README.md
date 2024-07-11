@@ -24,20 +24,18 @@ const nmos = new NMOS({
     basePath: '/x-nmos'
 })
 
-(async () => {
+// Get self/node
+const node = await nmos.get('/node/v1.3/self');
+console.log(node);
 
-    // Get self/node
-    const node = await nmos.get('/node/v1.3/self');
-    console.log(node);
-
-    // Get a specific device
-    const device = await nmos.get('/node/v1.3/devices/{device_id}', { devicd_id: "578aa0b3-992d-5ce0-9b4b-1d7b9713c4f2" });
-    console.log(device);
-
-})();
+// Get a specific device
+const device = await nmos.get('/node/v1.3/devices/{device_id}', { device_id: "578aa0b3-992d-5ce0-9b4b-1d7b9713c4f2" });
+console.log(device);
 ```
 
 ## IS-04
 This module currently only support GET requests for IS-04.
 
-## 
+## Author
+William Viker <william@bitfocus.io>
+Bitfocus AS
