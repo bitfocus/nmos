@@ -59,8 +59,7 @@ export default z
 											'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
 										)
 									)
-									.describe('ID of the Flow currently passing via this Sender')
-									.default(null),
+									.describe('ID of the Flow currently passing via this Sender'),
 								z.null().describe('ID of the Flow currently passing via this Sender').default(null),
 							])
 							.describe('ID of the Flow currently passing via this Sender')
@@ -131,8 +130,7 @@ export default z
 											)
 											.describe(
 												'UUID of the Receiver that this Sender is currently subscribed to'
-											)
-											.default(null),
+											),
 										z
 											.null()
 											.describe(

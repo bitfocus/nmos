@@ -2485,8 +2485,7 @@ export default z
 																			)
 																			.describe(
 																				'ID of the Flow currently passing via this Sender'
-																			)
-																			.default(null),
+																			),
 																		z
 																			.null()
 																			.describe(
@@ -2757,9 +2756,6 @@ export default z
 																												)
 																												.describe(
 																													'UUID of the Sender that this Receiver is currently subscribed to'
-																												)
-																												.default(
-																													null
 																												),
 																											z
 																												.null()
@@ -3006,9 +3002,6 @@ export default z
 																												)
 																												.describe(
 																													'UUID of the Sender that this Receiver is currently subscribed to'
-																												)
-																												.default(
-																													null
 																												),
 																											z
 																												.null()
@@ -3256,9 +3249,6 @@ export default z
 																												)
 																												.describe(
 																													'UUID of the Sender that this Receiver is currently subscribed to'
-																												)
-																												.default(
-																													null
 																												),
 																											z
 																												.null()
@@ -3503,9 +3493,6 @@ export default z
 																												)
 																												.describe(
 																													'UUID of the Sender that this Receiver is currently subscribed to'
-																												)
-																												.default(
-																													null
 																												),
 																											z
 																												.null()
@@ -6020,8 +6007,7 @@ export default z
 																			)
 																			.describe(
 																				'ID of the Flow currently passing via this Sender'
-																			)
-																			.default(null),
+																			),
 																		z
 																			.null()
 																			.describe(
@@ -6292,9 +6278,6 @@ export default z
 																												)
 																												.describe(
 																													'UUID of the Sender that this Receiver is currently subscribed to'
-																												)
-																												.default(
-																													null
 																												),
 																											z
 																												.null()
@@ -6541,9 +6524,6 @@ export default z
 																												)
 																												.describe(
 																													'UUID of the Sender that this Receiver is currently subscribed to'
-																												)
-																												.default(
-																													null
 																												),
 																											z
 																												.null()
@@ -6791,9 +6771,6 @@ export default z
 																												)
 																												.describe(
 																													'UUID of the Sender that this Receiver is currently subscribed to'
-																												)
-																												.default(
-																													null
 																												),
 																											z
 																												.null()
@@ -7038,9 +7015,6 @@ export default z
 																												)
 																												.describe(
 																													'UUID of the Sender that this Receiver is currently subscribed to'
-																												)
-																												.default(
-																													null
 																												),
 																											z
 																												.null()

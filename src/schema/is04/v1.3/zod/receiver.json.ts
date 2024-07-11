@@ -116,8 +116,7 @@ export default z
 																)
 																.describe(
 																	'UUID of the Sender from which this Receiver is currently configured to receive data. Only set if it is active and receiving from an NMOS Sender; otherwise null.'
-																)
-																.default(null),
+																),
 															z
 																.null()
 																.describe(
@@ -271,8 +270,7 @@ export default z
 																)
 																.describe(
 																	'UUID of the Sender from which this Receiver is currently configured to receive data. Only set if it is active and receiving from an NMOS Sender; otherwise null.'
-																)
-																.default(null),
+																),
 															z
 																.null()
 																.describe(
@@ -431,8 +429,7 @@ export default z
 																)
 																.describe(
 																	'UUID of the Sender from which this Receiver is currently configured to receive data. Only set if it is active and receiving from an NMOS Sender; otherwise null.'
-																)
-																.default(null),
+																),
 															z
 																.null()
 																.describe(
@@ -593,8 +590,7 @@ export default z
 																)
 																.describe(
 																	'UUID of the Sender from which this Receiver is currently configured to receive data. Only set if it is active and receiving from an NMOS Sender; otherwise null.'
-																)
-																.default(null),
+																),
 															z
 																.null()
 																.describe(

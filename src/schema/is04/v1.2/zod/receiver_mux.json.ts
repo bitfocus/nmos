@@ -113,8 +113,7 @@ export default z
 												)
 												.describe(
 													'UUID of the Sender that this Receiver is currently subscribed to'
-												)
-												.default(null),
+												),
 											z
 												.null()
 												.describe(

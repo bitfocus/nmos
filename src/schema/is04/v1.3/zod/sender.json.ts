@@ -53,8 +53,7 @@ export default z
 							)
 							.describe(
 								'ID of the Flow currently passing via this Sender. Set to null when a Flow is not currently internally routed to the Sender.'
-							)
-							.default(null),
+							),
 						z
 							.null()
 							.describe(
@@ -132,8 +131,7 @@ export default z
 									)
 									.describe(
 										'UUID of the Receiver to which this Sender is currently configured to send data. Only set if it is active, uses a unicast push-based transport and is sending to an NMOS Receiver; otherwise null.'
-									)
-									.default(null),
+									),
 								z
 									.null()
 									.describe(

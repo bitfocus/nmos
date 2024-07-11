@@ -59,7 +59,7 @@ export default z
 										)
 									)
 									.describe('ID of the Flow currently passing via this Sender')
-									.default(null),
+									,
 								z.null().describe('ID of the Flow currently passing via this Sender').default(null),
 							])
 							.describe('ID of the Flow currently passing via this Sender')
