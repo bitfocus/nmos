@@ -1,6 +1,6 @@
 import { NMOSRuntimeOptions } from './types'
 import { Axios } from 'axios'
-import { endpoints } from './schema'
+import { endpoints } from '../schema'
 import { z } from 'zod'
 
 type Endpoints = typeof endpoints
