@@ -1,0 +1,6 @@
+Generate schema files from the submodule json schema files
+
+ls *.json | perl -e'while(<>){chomp;system("json-refs resolve $_ | json-schema-to-zod | prettier --parser typescript > $_.ts");print $_."\n"}'
+mkdir zod
+mv *.ts zod/
+
