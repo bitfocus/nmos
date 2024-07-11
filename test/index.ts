@@ -6,13 +6,12 @@ const nmos = new NMOS({
 	port: 8090,
 	basePath: '/x-nmos',
 	dialect: 'test',
+	strict: true,
 })
 
 async function main() {
 	const node = await nmos.get('/node/v1.3/self');
-	console.log(node);
-
-	
+	console.log(node?.label)
 }
 
 main();

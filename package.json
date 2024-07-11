@@ -1,6 +1,6 @@
 {
   "name": "@bitfocus/nmos",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "TypeScript+Zod+NMOS=<3",
   "main": "dist/src/index.js",
   "scripts": {

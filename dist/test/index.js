@@ -19,11 +19,12 @@ const nmos = new index_1.default({
     port: 8090,
     basePath: '/x-nmos',
     dialect: 'test',
+    strict: true,
 });
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
         const node = yield nmos.get('/node/v1.3/self');
-        console.log(node);
+        console.log(node === null || node === void 0 ? void 0 : node.label);
     });
 }
 main();
