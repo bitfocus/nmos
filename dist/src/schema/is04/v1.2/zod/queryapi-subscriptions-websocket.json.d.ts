@@ -35,34 +35,34 @@ declare const _default: z.ZodObject<{
             post: z.ZodOptional<z.ZodIntersection<z.ZodRecord<z.ZodString, z.ZodAny>, z.ZodEffects<z.ZodAny, any, any>>>;
         }, "strip", z.ZodTypeAny, {
             path: string;
-            pre?: any;
             post?: any;
+            pre?: any;
         }, {
             path: string;
-            pre?: any;
             post?: any;
+            pre?: any;
         }>, "many">;
     }, "strip", z.ZodTypeAny, {
         type: "urn:x-nmos:format:data.event";
         topic: "/nodes/" | "/devices/" | "/sources/" | "/flows/" | "/senders/" | "/receivers/";
         data: {
             path: string;
-            pre?: any;
             post?: any;
+            pre?: any;
         }[];
     }, {
         type: "urn:x-nmos:format:data.event";
         topic: "/nodes/" | "/devices/" | "/sources/" | "/flows/" | "/senders/" | "/receivers/";
         data: {
             path: string;
-            pre?: any;
             post?: any;
+            pre?: any;
         }[];
     }>;
 }, "strip", z.ZodTypeAny, {
-    grain_type: "event";
-    source_id: string;
     flow_id: string;
+    source_id: string;
+    grain_type: "event";
     origin_timestamp: string;
     sync_timestamp: string;
     creation_timestamp: string;
@@ -79,14 +79,14 @@ declare const _default: z.ZodObject<{
         topic: "/nodes/" | "/devices/" | "/sources/" | "/flows/" | "/senders/" | "/receivers/";
         data: {
             path: string;
-            pre?: any;
             post?: any;
+            pre?: any;
         }[];
     };
 }, {
-    grain_type: "event";
-    source_id: string;
     flow_id: string;
+    source_id: string;
+    grain_type: "event";
     origin_timestamp: string;
     sync_timestamp: string;
     creation_timestamp: string;
@@ -103,8 +103,8 @@ declare const _default: z.ZodObject<{
         topic: "/nodes/" | "/devices/" | "/sources/" | "/flows/" | "/senders/" | "/receivers/";
         data: {
             path: string;
-            pre?: any;
             post?: any;
+            pre?: any;
         }[];
     };
 }>;

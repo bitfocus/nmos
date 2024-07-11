@@ -106,7 +106,6 @@ declare const _default: {
             port_id: string;
         }>, "many">;
     }, "strip", import("zod").ZodTypeAny, {
-        caps: Record<string, any>;
         href: string;
         api: {
             versions: string[];
@@ -116,6 +115,7 @@ declare const _default: {
                 host?: any;
             }[];
         };
+        caps: Record<string, any>;
         services: {
             type: string;
             href: string;
@@ -138,7 +138,6 @@ declare const _default: {
         }[];
         hostname?: string | undefined;
     }, {
-        caps: Record<string, any>;
         href: string;
         api: {
             versions: string[];
@@ -148,6 +147,7 @@ declare const _default: {
                 host?: any;
             }[];
         };
+        caps: Record<string, any>;
         services: {
             type: string;
             href: string;
@@ -428,16 +428,16 @@ declare const _default: {
         parents: import("zod").ZodArray<import("zod").ZodString, "many">;
     }, "strip", import("zod").ZodTypeAny, {
         device_id: string;
-        source_id: string;
         parents: string[];
+        source_id: string;
         grain_rate?: {
             numerator: number;
             denominator: number;
         } | undefined;
     }, {
         device_id: string;
-        source_id: string;
         parents: string[];
+        source_id: string;
         grain_rate?: {
             numerator: number;
             denominator?: number | undefined;
@@ -471,12 +471,12 @@ declare const _default: {
             height: import("zod").ZodNumber;
             bit_depth: import("zod").ZodNumber;
         }, "strip", import("zod").ZodTypeAny, {
-            name: "Y" | "Cb" | "Cr" | "I" | "Ct" | "Cp" | "A" | "R" | "G" | "B" | "DepthMap";
+            name: "R" | "Y" | "Cb" | "Cr" | "I" | "Ct" | "Cp" | "A" | "G" | "B" | "DepthMap";
             width: number;
             height: number;
             bit_depth: number;
         }, {
-            name: "Y" | "Cb" | "Cr" | "I" | "Ct" | "Cp" | "A" | "R" | "G" | "B" | "DepthMap";
+            name: "R" | "Y" | "Cb" | "Cr" | "I" | "Ct" | "Cp" | "A" | "G" | "B" | "DepthMap";
             width: number;
             height: number;
             bit_depth: number;
@@ -484,7 +484,7 @@ declare const _default: {
     }, "strip", import("zod").ZodTypeAny, {
         media_type: "video/raw";
         components: {
-            name: "Y" | "Cb" | "Cr" | "I" | "Ct" | "Cp" | "A" | "R" | "G" | "B" | "DepthMap";
+            name: "R" | "Y" | "Cb" | "Cr" | "I" | "Ct" | "Cp" | "A" | "G" | "B" | "DepthMap";
             width: number;
             height: number;
             bit_depth: number;
@@ -492,7 +492,7 @@ declare const _default: {
     }, {
         media_type: "video/raw";
         components: {
-            name: "Y" | "Cb" | "Cr" | "I" | "Ct" | "Cp" | "A" | "R" | "G" | "B" | "DepthMap";
+            name: "R" | "Y" | "Cb" | "Cr" | "I" | "Ct" | "Cp" | "A" | "G" | "B" | "DepthMap";
             width: number;
             height: number;
             bit_depth: number;
@@ -531,16 +531,16 @@ declare const _default: {
         parents: import("zod").ZodArray<import("zod").ZodString, "many">;
     }, "strip", import("zod").ZodTypeAny, {
         device_id: string;
-        source_id: string;
         parents: string[];
+        source_id: string;
         grain_rate?: {
             numerator: number;
             denominator: number;
         } | undefined;
     }, {
         device_id: string;
-        source_id: string;
         parents: string[];
+        source_id: string;
         grain_rate?: {
             numerator: number;
             denominator?: number | undefined;
@@ -606,16 +606,16 @@ declare const _default: {
         parents: import("zod").ZodArray<import("zod").ZodString, "many">;
     }, "strip", import("zod").ZodTypeAny, {
         device_id: string;
-        source_id: string;
         parents: string[];
+        source_id: string;
         grain_rate?: {
             numerator: number;
             denominator: number;
         } | undefined;
     }, {
         device_id: string;
-        source_id: string;
         parents: string[];
+        source_id: string;
         grain_rate?: {
             numerator: number;
             denominator?: number | undefined;
@@ -687,16 +687,16 @@ declare const _default: {
         parents: import("zod").ZodArray<import("zod").ZodString, "many">;
     }, "strip", import("zod").ZodTypeAny, {
         device_id: string;
-        source_id: string;
         parents: string[];
+        source_id: string;
         grain_rate?: {
             numerator: number;
             denominator: number;
         } | undefined;
     }, {
         device_id: string;
-        source_id: string;
         parents: string[];
+        source_id: string;
         grain_rate?: {
             numerator: number;
             denominator?: number | undefined;
@@ -765,16 +765,16 @@ declare const _default: {
         parents: import("zod").ZodArray<import("zod").ZodString, "many">;
     }, "strip", import("zod").ZodTypeAny, {
         device_id: string;
-        source_id: string;
         parents: string[];
+        source_id: string;
         grain_rate?: {
             numerator: number;
             denominator: number;
         } | undefined;
     }, {
         device_id: string;
-        source_id: string;
         parents: string[];
+        source_id: string;
         grain_rate?: {
             numerator: number;
             denominator?: number | undefined;
@@ -822,16 +822,16 @@ declare const _default: {
         parents: import("zod").ZodArray<import("zod").ZodString, "many">;
     }, "strip", import("zod").ZodTypeAny, {
         device_id: string;
-        source_id: string;
         parents: string[];
+        source_id: string;
         grain_rate?: {
             numerator: number;
             denominator: number;
         } | undefined;
     }, {
         device_id: string;
-        source_id: string;
         parents: string[];
+        source_id: string;
         grain_rate?: {
             numerator: number;
             denominator?: number | undefined;
@@ -897,16 +897,16 @@ declare const _default: {
         parents: import("zod").ZodArray<import("zod").ZodString, "many">;
     }, "strip", import("zod").ZodTypeAny, {
         device_id: string;
-        source_id: string;
         parents: string[];
+        source_id: string;
         grain_rate?: {
             numerator: number;
             denominator: number;
         } | undefined;
     }, {
         device_id: string;
-        source_id: string;
         parents: string[];
+        source_id: string;
         grain_rate?: {
             numerator: number;
             denominator?: number | undefined;
@@ -955,16 +955,16 @@ declare const _default: {
         parents: import("zod").ZodArray<import("zod").ZodString, "many">;
     }, "strip", import("zod").ZodTypeAny, {
         device_id: string;
-        source_id: string;
         parents: string[];
+        source_id: string;
         grain_rate?: {
             numerator: number;
             denominator: number;
         } | undefined;
     }, {
         device_id: string;
-        source_id: string;
         parents: string[];
+        source_id: string;
         grain_rate?: {
             numerator: number;
             denominator?: number | undefined;
@@ -998,12 +998,12 @@ declare const _default: {
             height: import("zod").ZodNumber;
             bit_depth: import("zod").ZodNumber;
         }, "strip", import("zod").ZodTypeAny, {
-            name: "Y" | "Cb" | "Cr" | "I" | "Ct" | "Cp" | "A" | "R" | "G" | "B" | "DepthMap";
+            name: "R" | "Y" | "Cb" | "Cr" | "I" | "Ct" | "Cp" | "A" | "G" | "B" | "DepthMap";
             width: number;
             height: number;
             bit_depth: number;
         }, {
-            name: "Y" | "Cb" | "Cr" | "I" | "Ct" | "Cp" | "A" | "R" | "G" | "B" | "DepthMap";
+            name: "R" | "Y" | "Cb" | "Cr" | "I" | "Ct" | "Cp" | "A" | "G" | "B" | "DepthMap";
             width: number;
             height: number;
             bit_depth: number;
@@ -1011,7 +1011,7 @@ declare const _default: {
     }, "strip", import("zod").ZodTypeAny, {
         media_type: "video/raw";
         components: {
-            name: "Y" | "Cb" | "Cr" | "I" | "Ct" | "Cp" | "A" | "R" | "G" | "B" | "DepthMap";
+            name: "R" | "Y" | "Cb" | "Cr" | "I" | "Ct" | "Cp" | "A" | "G" | "B" | "DepthMap";
             width: number;
             height: number;
             bit_depth: number;
@@ -1019,7 +1019,7 @@ declare const _default: {
     }, {
         media_type: "video/raw";
         components: {
-            name: "Y" | "Cb" | "Cr" | "I" | "Ct" | "Cp" | "A" | "R" | "G" | "B" | "DepthMap";
+            name: "R" | "Y" | "Cb" | "Cr" | "I" | "Ct" | "Cp" | "A" | "G" | "B" | "DepthMap";
             width: number;
             height: number;
             bit_depth: number;
@@ -1058,16 +1058,16 @@ declare const _default: {
         parents: import("zod").ZodArray<import("zod").ZodString, "many">;
     }, "strip", import("zod").ZodTypeAny, {
         device_id: string;
-        source_id: string;
         parents: string[];
+        source_id: string;
         grain_rate?: {
             numerator: number;
             denominator: number;
         } | undefined;
     }, {
         device_id: string;
-        source_id: string;
         parents: string[];
+        source_id: string;
         grain_rate?: {
             numerator: number;
             denominator?: number | undefined;
@@ -1133,16 +1133,16 @@ declare const _default: {
         parents: import("zod").ZodArray<import("zod").ZodString, "many">;
     }, "strip", import("zod").ZodTypeAny, {
         device_id: string;
-        source_id: string;
         parents: string[];
+        source_id: string;
         grain_rate?: {
             numerator: number;
             denominator: number;
         } | undefined;
     }, {
         device_id: string;
-        source_id: string;
         parents: string[];
+        source_id: string;
         grain_rate?: {
             numerator: number;
             denominator?: number | undefined;
@@ -1214,16 +1214,16 @@ declare const _default: {
         parents: import("zod").ZodArray<import("zod").ZodString, "many">;
     }, "strip", import("zod").ZodTypeAny, {
         device_id: string;
-        source_id: string;
         parents: string[];
+        source_id: string;
         grain_rate?: {
             numerator: number;
             denominator: number;
         } | undefined;
     }, {
         device_id: string;
-        source_id: string;
         parents: string[];
+        source_id: string;
         grain_rate?: {
             numerator: number;
             denominator?: number | undefined;
@@ -1292,16 +1292,16 @@ declare const _default: {
         parents: import("zod").ZodArray<import("zod").ZodString, "many">;
     }, "strip", import("zod").ZodTypeAny, {
         device_id: string;
-        source_id: string;
         parents: string[];
+        source_id: string;
         grain_rate?: {
             numerator: number;
             denominator: number;
         } | undefined;
     }, {
         device_id: string;
-        source_id: string;
         parents: string[];
+        source_id: string;
         grain_rate?: {
             numerator: number;
             denominator?: number | undefined;
@@ -1349,16 +1349,16 @@ declare const _default: {
         parents: import("zod").ZodArray<import("zod").ZodString, "many">;
     }, "strip", import("zod").ZodTypeAny, {
         device_id: string;
-        source_id: string;
         parents: string[];
+        source_id: string;
         grain_rate?: {
             numerator: number;
             denominator: number;
         } | undefined;
     }, {
         device_id: string;
-        source_id: string;
         parents: string[];
+        source_id: string;
         grain_rate?: {
             numerator: number;
             denominator?: number | undefined;
@@ -1424,16 +1424,16 @@ declare const _default: {
         parents: import("zod").ZodArray<import("zod").ZodString, "many">;
     }, "strip", import("zod").ZodTypeAny, {
         device_id: string;
-        source_id: string;
         parents: string[];
+        source_id: string;
         grain_rate?: {
             numerator: number;
             denominator: number;
         } | undefined;
     }, {
         device_id: string;
-        source_id: string;
         parents: string[];
+        source_id: string;
         grain_rate?: {
             numerator: number;
             denominator?: number | undefined;

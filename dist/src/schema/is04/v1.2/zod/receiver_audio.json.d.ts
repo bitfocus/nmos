@@ -25,26 +25,26 @@ declare const _default: z.ZodIntersection<z.ZodRecord<z.ZodString, z.ZodAny>, z.
         sender_id: z.ZodDefault<z.ZodUnion<[z.ZodString, z.ZodNull]>>;
         active: z.ZodDefault<z.ZodBoolean>;
     }, "strip", z.ZodTypeAny, {
-        sender_id: string | null;
         active: boolean;
+        sender_id: string | null;
     }, {
-        sender_id?: string | null | undefined;
         active?: boolean | undefined;
+        sender_id?: string | null | undefined;
     }>;
 }, "strip", z.ZodTypeAny, {
     device_id: string;
     interface_bindings: string[];
     subscription: {
-        sender_id: string | null;
         active: boolean;
+        sender_id: string | null;
     };
     transport?: any;
 }, {
     device_id: string;
     interface_bindings: string[];
     subscription: {
-        sender_id?: string | null | undefined;
         active?: boolean | undefined;
+        sender_id?: string | null | undefined;
     };
     transport?: any;
 }>>>, z.ZodObject<{
@@ -57,14 +57,14 @@ declare const _default: z.ZodIntersection<z.ZodRecord<z.ZodString, z.ZodAny>, z.
         media_types?: any[] | undefined;
     }>;
 }, "strip", z.ZodTypeAny, {
-    format: "urn:x-nmos:format:audio";
     caps: {
         media_types?: any[] | undefined;
     };
+    format: "urn:x-nmos:format:audio";
 }, {
-    format: "urn:x-nmos:format:audio";
     caps: {
         media_types?: any[] | undefined;
     };
+    format: "urn:x-nmos:format:audio";
 }>>>;
 export default _default;

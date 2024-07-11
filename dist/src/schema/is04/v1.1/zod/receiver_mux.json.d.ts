@@ -49,14 +49,14 @@ declare const _default: z.ZodIntersection<z.ZodRecord<z.ZodString, z.ZodAny>, z.
         media_types?: any[] | undefined;
     }>;
 }, "strip", z.ZodTypeAny, {
-    format: "urn:x-nmos:format:mux";
     caps: {
         media_types?: any[] | undefined;
     };
+    format: "urn:x-nmos:format:mux";
 }, {
-    format: "urn:x-nmos:format:mux";
     caps: {
         media_types?: any[] | undefined;
     };
+    format: "urn:x-nmos:format:mux";
 }>>>;
 export default _default;

@@ -21,26 +21,26 @@ declare const _default: z.ZodArray<z.ZodObject<{
     version: string;
     label: string;
     description: string;
-    format: "urn:x-nmos:format:video" | "urn:x-nmos:format:audio" | "urn:x-nmos:format:data";
-    caps: Record<string, any>;
     tags: Record<string, string[]>;
-    device_id: string;
+    caps: Record<string, any>;
     transport: "urn:x-nmos:transport:rtp" | "urn:x-nmos:transport:rtp.ucast" | "urn:x-nmos:transport:rtp.mcast" | "urn:x-nmos:transport:dash";
+    device_id: string;
     subscription: {
         sender_id: string | null;
     };
+    format: "urn:x-nmos:format:video" | "urn:x-nmos:format:audio" | "urn:x-nmos:format:data";
 }, {
     id: string;
     version: string;
     label: string;
     description: string;
-    format: "urn:x-nmos:format:video" | "urn:x-nmos:format:audio" | "urn:x-nmos:format:data";
-    caps: Record<string, any>;
     tags: Record<string, string[]>;
-    device_id: string;
+    caps: Record<string, any>;
     transport: "urn:x-nmos:transport:rtp" | "urn:x-nmos:transport:rtp.ucast" | "urn:x-nmos:transport:rtp.mcast" | "urn:x-nmos:transport:dash";
+    device_id: string;
     subscription: {
         sender_id?: string | null | undefined;
     };
+    format: "urn:x-nmos:format:video" | "urn:x-nmos:format:audio" | "urn:x-nmos:format:data";
 }>, "many">;
 export default _default;

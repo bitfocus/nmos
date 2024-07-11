@@ -28,33 +28,33 @@ declare const _default: z.ZodIntersection<z.ZodRecord<z.ZodString, z.ZodAny>, z.
         receiver_id: z.ZodDefault<z.ZodUnion<[z.ZodString, z.ZodDefault<z.ZodNull>]>>;
         active: z.ZodDefault<z.ZodBoolean>;
     }, "strip", z.ZodTypeAny, {
-        active: boolean;
         receiver_id: string | null;
+        active: boolean;
     }, {
-        active?: boolean | undefined;
         receiver_id?: string | null | undefined;
+        active?: boolean | undefined;
     }>;
 }, "strip", z.ZodTypeAny, {
+    flow_id: string | null;
     device_id: string;
+    manifest_href: string;
     interface_bindings: string[];
     subscription: {
-        active: boolean;
         receiver_id: string | null;
+        active: boolean;
     };
-    flow_id: string | null;
-    manifest_href: string;
-    transport?: any;
     caps?: {} | undefined;
+    transport?: any;
 }, {
     device_id: string;
+    manifest_href: string;
     interface_bindings: string[];
     subscription: {
-        active?: boolean | undefined;
         receiver_id?: string | null | undefined;
+        active?: boolean | undefined;
     };
-    manifest_href: string;
-    transport?: any;
     caps?: {} | undefined;
     flow_id?: string | null | undefined;
+    transport?: any;
 }>>>;
 export default _default;

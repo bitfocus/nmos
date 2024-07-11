@@ -20,8 +20,8 @@ declare const _default: {
         id: string;
         version: string;
         label: string;
-        caps: Record<string, any>;
         href: string;
+        caps: Record<string, any>;
         services: {
             type: string;
             href: string;
@@ -31,8 +31,8 @@ declare const _default: {
         id: string;
         version: string;
         label: string;
-        caps: Record<string, any>;
         href: string;
+        caps: Record<string, any>;
         services: {
             type: string;
             href: string;
@@ -48,18 +48,18 @@ declare const _default: {
         senders: import("zod").ZodArray<import("zod").ZodString, "many">;
         receivers: import("zod").ZodArray<import("zod").ZodString, "many">;
     }, "strip", import("zod").ZodTypeAny, {
+        type: string;
         id: string;
         version: string;
         label: string;
-        type: string;
         node_id: string;
         senders: string[];
         receivers: string[];
     }, {
+        type: string;
         id: string;
         version: string;
         label: string;
-        type: string;
         node_id: string;
         senders: string[];
         receivers: string[];
@@ -73,18 +73,18 @@ declare const _default: {
         senders: import("zod").ZodArray<import("zod").ZodString, "many">;
         receivers: import("zod").ZodArray<import("zod").ZodString, "many">;
     }, "strip", import("zod").ZodTypeAny, {
+        type: string;
         id: string;
         version: string;
         label: string;
-        type: string;
         node_id: string;
         senders: string[];
         receivers: string[];
     }, {
+        type: string;
         id: string;
         version: string;
         label: string;
-        type: string;
         node_id: string;
         senders: string[];
         receivers: string[];
@@ -104,9 +104,9 @@ declare const _default: {
         version: string;
         label: string;
         description: string;
-        device_id: string;
-        transport: "urn:x-nmos:transport:rtp" | "urn:x-nmos:transport:rtp.ucast" | "urn:x-nmos:transport:rtp.mcast" | "urn:x-nmos:transport:dash";
         flow_id: string;
+        transport: "urn:x-nmos:transport:rtp" | "urn:x-nmos:transport:rtp.ucast" | "urn:x-nmos:transport:rtp.mcast" | "urn:x-nmos:transport:dash";
+        device_id: string;
         manifest_href: string;
         tags?: Record<string, string[]> | undefined;
     }, {
@@ -114,9 +114,9 @@ declare const _default: {
         version: string;
         label: string;
         description: string;
-        device_id: string;
-        transport: "urn:x-nmos:transport:rtp" | "urn:x-nmos:transport:rtp.ucast" | "urn:x-nmos:transport:rtp.mcast" | "urn:x-nmos:transport:dash";
         flow_id: string;
+        transport: "urn:x-nmos:transport:rtp" | "urn:x-nmos:transport:rtp.ucast" | "urn:x-nmos:transport:rtp.mcast" | "urn:x-nmos:transport:dash";
+        device_id: string;
         manifest_href: string;
         tags?: Record<string, string[]> | undefined;
     }>, "many">;
@@ -135,9 +135,9 @@ declare const _default: {
         version: string;
         label: string;
         description: string;
-        device_id: string;
-        transport: "urn:x-nmos:transport:rtp" | "urn:x-nmos:transport:rtp.ucast" | "urn:x-nmos:transport:rtp.mcast" | "urn:x-nmos:transport:dash";
         flow_id: string;
+        transport: "urn:x-nmos:transport:rtp" | "urn:x-nmos:transport:rtp.ucast" | "urn:x-nmos:transport:rtp.mcast" | "urn:x-nmos:transport:dash";
+        device_id: string;
         manifest_href: string;
         tags?: Record<string, string[]> | undefined;
     }, {
@@ -145,9 +145,9 @@ declare const _default: {
         version: string;
         label: string;
         description: string;
-        device_id: string;
-        transport: "urn:x-nmos:transport:rtp" | "urn:x-nmos:transport:rtp.ucast" | "urn:x-nmos:transport:rtp.mcast" | "urn:x-nmos:transport:dash";
         flow_id: string;
+        transport: "urn:x-nmos:transport:rtp" | "urn:x-nmos:transport:rtp.ucast" | "urn:x-nmos:transport:rtp.mcast" | "urn:x-nmos:transport:dash";
+        device_id: string;
         manifest_href: string;
         tags?: Record<string, string[]> | undefined;
     }>;
@@ -173,27 +173,27 @@ declare const _default: {
         version: string;
         label: string;
         description: string;
-        format: "urn:x-nmos:format:video" | "urn:x-nmos:format:audio" | "urn:x-nmos:format:data";
-        caps: Record<string, any>;
         tags: Record<string, string[]>;
-        device_id: string;
+        caps: Record<string, any>;
         transport: "urn:x-nmos:transport:rtp" | "urn:x-nmos:transport:rtp.ucast" | "urn:x-nmos:transport:rtp.mcast" | "urn:x-nmos:transport:dash";
+        device_id: string;
         subscription: {
             sender_id: string | null;
         };
+        format: "urn:x-nmos:format:video" | "urn:x-nmos:format:audio" | "urn:x-nmos:format:data";
     }, {
         id: string;
         version: string;
         label: string;
         description: string;
-        format: "urn:x-nmos:format:video" | "urn:x-nmos:format:audio" | "urn:x-nmos:format:data";
-        caps: Record<string, any>;
         tags: Record<string, string[]>;
-        device_id: string;
+        caps: Record<string, any>;
         transport: "urn:x-nmos:transport:rtp" | "urn:x-nmos:transport:rtp.ucast" | "urn:x-nmos:transport:rtp.mcast" | "urn:x-nmos:transport:dash";
+        device_id: string;
         subscription: {
             sender_id?: string | null | undefined;
         };
+        format: "urn:x-nmos:format:video" | "urn:x-nmos:format:audio" | "urn:x-nmos:format:data";
     }>, "many">;
     '/node/v1.0/receivers/{receiver_id}': import("zod").ZodObject<{
         id: import("zod").ZodString;
@@ -217,27 +217,27 @@ declare const _default: {
         version: string;
         label: string;
         description: string;
-        format: "urn:x-nmos:format:video" | "urn:x-nmos:format:audio" | "urn:x-nmos:format:data";
-        caps: Record<string, any>;
         tags: Record<string, string[]>;
-        device_id: string;
+        caps: Record<string, any>;
         transport: "urn:x-nmos:transport:rtp" | "urn:x-nmos:transport:rtp.ucast" | "urn:x-nmos:transport:rtp.mcast" | "urn:x-nmos:transport:dash";
+        device_id: string;
         subscription: {
             sender_id: string | null;
         };
+        format: "urn:x-nmos:format:video" | "urn:x-nmos:format:audio" | "urn:x-nmos:format:data";
     }, {
         id: string;
         version: string;
         label: string;
         description: string;
-        format: "urn:x-nmos:format:video" | "urn:x-nmos:format:audio" | "urn:x-nmos:format:data";
-        caps: Record<string, any>;
         tags: Record<string, string[]>;
-        device_id: string;
+        caps: Record<string, any>;
         transport: "urn:x-nmos:transport:rtp" | "urn:x-nmos:transport:rtp.ucast" | "urn:x-nmos:transport:rtp.mcast" | "urn:x-nmos:transport:dash";
+        device_id: string;
         subscription: {
             sender_id?: string | null | undefined;
         };
+        format: "urn:x-nmos:format:video" | "urn:x-nmos:format:audio" | "urn:x-nmos:format:data";
     }>;
     '/node/v1.0/sources': import("zod").ZodArray<import("zod").ZodObject<{
         id: import("zod").ZodString;
@@ -254,20 +254,20 @@ declare const _default: {
         version: string;
         label: string;
         description: string;
-        format: "urn:x-nmos:format:video" | "urn:x-nmos:format:audio" | "urn:x-nmos:format:data";
-        caps: Record<string, any>;
         tags: Record<string, string[]>;
+        caps: Record<string, any>;
         device_id: string;
+        format: "urn:x-nmos:format:video" | "urn:x-nmos:format:audio" | "urn:x-nmos:format:data";
         parents: string[];
     }, {
         id: string;
         version: string;
         label: string;
         description: string;
-        format: "urn:x-nmos:format:video" | "urn:x-nmos:format:audio" | "urn:x-nmos:format:data";
-        caps: Record<string, any>;
         tags: Record<string, string[]>;
+        caps: Record<string, any>;
         device_id: string;
+        format: "urn:x-nmos:format:video" | "urn:x-nmos:format:audio" | "urn:x-nmos:format:data";
         parents: string[];
     }>, "many">;
     '/node/v1.0/sources/{source_id}': import("zod").ZodObject<{
@@ -285,20 +285,20 @@ declare const _default: {
         version: string;
         label: string;
         description: string;
-        format: "urn:x-nmos:format:video" | "urn:x-nmos:format:audio" | "urn:x-nmos:format:data";
-        caps: Record<string, any>;
         tags: Record<string, string[]>;
+        caps: Record<string, any>;
         device_id: string;
+        format: "urn:x-nmos:format:video" | "urn:x-nmos:format:audio" | "urn:x-nmos:format:data";
         parents: string[];
     }, {
         id: string;
         version: string;
         label: string;
         description: string;
-        format: "urn:x-nmos:format:video" | "urn:x-nmos:format:audio" | "urn:x-nmos:format:data";
-        caps: Record<string, any>;
         tags: Record<string, string[]>;
+        caps: Record<string, any>;
         device_id: string;
+        format: "urn:x-nmos:format:video" | "urn:x-nmos:format:audio" | "urn:x-nmos:format:data";
         parents: string[];
     }>;
     '/node/v1.0/flows': import("zod").ZodArray<import("zod").ZodObject<{
@@ -315,8 +315,8 @@ declare const _default: {
         version: string;
         label: string;
         description: string;
-        format: "urn:x-nmos:format:video" | "urn:x-nmos:format:audio" | "urn:x-nmos:format:data";
         tags: Record<string, string[]>;
+        format: "urn:x-nmos:format:video" | "urn:x-nmos:format:audio" | "urn:x-nmos:format:data";
         parents: string[];
         source_id: string;
     }, {
@@ -324,8 +324,8 @@ declare const _default: {
         version: string;
         label: string;
         description: string;
-        format: "urn:x-nmos:format:video" | "urn:x-nmos:format:audio" | "urn:x-nmos:format:data";
         tags: Record<string, string[]>;
+        format: "urn:x-nmos:format:video" | "urn:x-nmos:format:audio" | "urn:x-nmos:format:data";
         parents: string[];
         source_id: string;
     }>, "many">;
@@ -343,8 +343,8 @@ declare const _default: {
         version: string;
         label: string;
         description: string;
-        format: "urn:x-nmos:format:video" | "urn:x-nmos:format:audio" | "urn:x-nmos:format:data";
         tags: Record<string, string[]>;
+        format: "urn:x-nmos:format:video" | "urn:x-nmos:format:audio" | "urn:x-nmos:format:data";
         parents: string[];
         source_id: string;
     }, {
@@ -352,8 +352,8 @@ declare const _default: {
         version: string;
         label: string;
         description: string;
-        format: "urn:x-nmos:format:video" | "urn:x-nmos:format:audio" | "urn:x-nmos:format:data";
         tags: Record<string, string[]>;
+        format: "urn:x-nmos:format:video" | "urn:x-nmos:format:audio" | "urn:x-nmos:format:data";
         parents: string[];
         source_id: string;
     }>;
