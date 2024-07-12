@@ -54,25 +54,25 @@ declare const _default: z.ZodIntersection<z.ZodRecord<z.ZodString, z.ZodAny>, z.
     format: z.ZodLiteral<"urn:x-nmos:format:audio">;
     channels: z.ZodArray<z.ZodObject<{
         label: z.ZodString;
-        symbol: z.ZodOptional<z.ZodEffects<z.ZodAny, any, any>>;
+        symbol: z.ZodOptional<z.ZodUnion<[z.ZodUnion<[z.ZodEnum<["L", "R", "C", "LFE", "Ls", "Rs", "Lss", "Rss", "Lrs", "Rrs", "Lc", "Rc", "Cs", "HI", "VIN", "M1", "M2", "Lt", "Rt", "Lst", "Rst", "S"]>, z.ZodString]>, z.ZodString]>>;
     }, "strip", z.ZodTypeAny, {
         label: string;
-        symbol?: any;
+        symbol?: string | undefined;
     }, {
         label: string;
-        symbol?: any;
+        symbol?: string | undefined;
     }>, "many">;
 }, "strip", z.ZodTypeAny, {
     format: "urn:x-nmos:format:audio";
     channels: {
         label: string;
-        symbol?: any;
+        symbol?: string | undefined;
     }[];
 }, {
     format: "urn:x-nmos:format:audio";
     channels: {
         label: string;
-        symbol?: any;
+        symbol?: string | undefined;
     }[];
 }>>>;
 export default _default;

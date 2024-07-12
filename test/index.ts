@@ -10,8 +10,8 @@ const nmos = new NMOS({
 })
 
 async function main() {
-	const node = await nmos.get('/node/v1.3/self');
-	console.log(node?.label)
+	const sources = await nmos.get('/node/v1.3/sources');
+	console.log("sources",sources);
 }
 
 main();

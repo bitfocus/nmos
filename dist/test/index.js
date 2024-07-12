@@ -23,8 +23,8 @@ const nmos = new index_1.default({
 });
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
-        const node = yield nmos.get('/node/v1.3/self');
-        console.log(node === null || node === void 0 ? void 0 : node.label);
+        const sources = yield nmos.get('/node/v1.3/sources');
+        console.log("sources", sources);
     });
 }
 main();

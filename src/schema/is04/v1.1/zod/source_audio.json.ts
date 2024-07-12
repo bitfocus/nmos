@@ -104,54 +104,34 @@ export default z
 				channels: z
 					.array(
 						z.object({
-							label: z.string().describe('Label for this channel (free text)'),
+							label: z.string().describe('Label for this channel'),
 							symbol: z
-								.any()
-								.superRefine((x, ctx) => {
-									const schemas = [
-										z.enum([
-											'L',
-											'R',
-											'C',
-											'LFE',
-											'Ls',
-											'Rs',
-											'Lss',
-											'Rss',
-											'Lrs',
-											'Rrs',
-											'Lc',
-											'Rc',
-											'Cs',
-											'HI',
-											'VIN',
-											'M1',
-											'M2',
-											'Lt',
-											'Rt',
-											'Lst',
-											'Rst',
-											'S',
-										]),
-										z.any().describe('Numbered Source Channel'),
-										z.any().describe('Undefined channel'),
-									]
-									const errors = schemas.reduce<z.ZodError[]>(
-										(errors, schema) =>
-											((result) => (result.error ? [...errors, result.error] : errors))(
-												schema.safeParse(x)
-											),
-										[]
-									)
-									if (schemas.length - errors.length !== 1) {
-										ctx.addIssue({
-											path: ctx.path,
-											code: 'invalid_union',
-											unionErrors: errors,
-											message: 'Invalid input: Should pass single schema',
-										})
-									}
-								})
+								.enum([
+									'L',
+									'R',
+									'C',
+									'LFE',
+									'Ls',
+									'Rs',
+									'Lss',
+									'Rss',
+									'Lrs',
+									'Rrs',
+									'Lc',
+									'Rc',
+									'Cs',
+									'HI',
+									'VIN',
+									'M1',
+									'M2',
+									'Lt',
+									'Rt',
+									'Lst',
+									'Rst',
+									'S',
+								])
+								.or(z.string().regex(new RegExp('^NSC(0[0-9][0-9]|1[0-1][0-9]|12[0-8])$')))
+								.or(z.string().regex(new RegExp('^U(0[1-9]|[1-5][0-9]|6[0-4])$')))
 								.describe('Symbol for this channel (from VSF TR-03 Appendix A)')
 								.optional(),
 						})

@@ -72,48 +72,34 @@ exports.default = zod_1.z
         .describe('Format of the data coming from the Source as a URN'),
     channels: zod_1.z
         .array(zod_1.z.object({
-        label: zod_1.z.string().describe('Label for this channel (free text)'),
+        label: zod_1.z.string().describe('Label for this channel'),
         symbol: zod_1.z
-            .any()
-            .superRefine((x, ctx) => {
-            const schemas = [
-                zod_1.z.enum([
-                    'L',
-                    'R',
-                    'C',
-                    'LFE',
-                    'Ls',
-                    'Rs',
-                    'Lss',
-                    'Rss',
-                    'Lrs',
-                    'Rrs',
-                    'Lc',
-                    'Rc',
-                    'Cs',
-                    'HI',
-                    'VIN',
-                    'M1',
-                    'M2',
-                    'Lt',
-                    'Rt',
-                    'Lst',
-                    'Rst',
-                    'S',
-                ]),
-                zod_1.z.any().describe('Numbered Source Channel'),
-                zod_1.z.any().describe('Undefined channel'),
-            ];
-            const errors = schemas.reduce((errors, schema) => ((result) => (result.error ? [...errors, result.error] : errors))(schema.safeParse(x)), []);
-            if (schemas.length - errors.length !== 1) {
-                ctx.addIssue({
-                    path: ctx.path,
-                    code: 'invalid_union',
-                    unionErrors: errors,
-                    message: 'Invalid input: Should pass single schema',
-                });
-            }
-        })
+            .enum([
+            'L',
+            'R',
+            'C',
+            'LFE',
+            'Ls',
+            'Rs',
+            'Lss',
+            'Rss',
+            'Lrs',
+            'Rrs',
+            'Lc',
+            'Rc',
+            'Cs',
+            'HI',
+            'VIN',
+            'M1',
+            'M2',
+            'Lt',
+            'Rt',
+            'Lst',
+            'Rst',
+            'S',
+        ])
+            .or(zod_1.z.string().regex(new RegExp('^NSC(0[0-9][0-9]|1[0-1][0-9]|12[0-8])$')))
+            .or(zod_1.z.string().regex(new RegExp('^U(0[1-9]|[1-5][0-9]|6[0-4])$')))
             .describe('Symbol for this channel (from VSF TR-03 Appendix A)')
             .optional(),
     }))
