@@ -4,3 +4,8 @@ ls *.json | perl -e'while(<>){chomp;system("json-refs resolve $_ | json-schema-t
 mkdir zod
 mv *.ts zod/
 
+
+
+Fix shitty generated files with duplicate title keys
+
+for FILE in *.json; do cat $FILE | jq > jq/$FILE; done
