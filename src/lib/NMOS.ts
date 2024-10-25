@@ -44,7 +44,7 @@ export class NMOSRuntime {
 				const parse = await endpoint.parseAsync(result.data)
 				return result.data
 			} catch (error) {
-				console.error('Schema validation failed', error)
+				console.error('Schema validation failed', resolvedPath, error)
 				if (this.options.strict) {
 					throw new Error('Strict mode enabled, failed to parse data')
 				}
