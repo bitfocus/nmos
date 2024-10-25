@@ -28,7 +28,7 @@ export class NMOSRuntime {
 		const result = await this.runtime.get<EndpointType<T>>(resolvedPath)
 
 		if (result.status !== 200) {
-			throw new Error('Failed to fetch data')
+			throw new Error('Failed to fetch data from: ' + resolvedPath)
 		}
 
 		try {
