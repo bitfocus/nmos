@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { idPrimitive } from './_primitives'
 
 export default z
 	.array(
@@ -84,23 +85,11 @@ export default z
 																	'Number of Grains per second for this Flow. Must be an integer division of, or equal to the Grain rate specified by the parent Source. Grain rate matches the frame rate for video (see NMOS Content Model). Specified for periodic Flows only.'
 																)
 																.optional(),
-															source_id: z
-																.string()
-																.regex(
-																	new RegExp(
-																		'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-																	)
-																)
+															source_id: idPrimitive
 																.describe(
 																	'Globally unique identifier for the Source which initially created the Flow. This attribute is used to ensure referential integrity by registry implementations (v1.0 only).'
 																),
-															device_id: z
-																.string()
-																.regex(
-																	new RegExp(
-																		'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-																	)
-																)
+															device_id: idPrimitive
 																.describe(
 																	'Globally unique identifier for the Device which initially created the Flow. This attribute is used to ensure referential integrity by registry implementations (v1.1 onwards).'
 																),
@@ -271,23 +260,11 @@ export default z
 																	'Number of Grains per second for this Flow. Must be an integer division of, or equal to the Grain rate specified by the parent Source. Grain rate matches the frame rate for video (see NMOS Content Model). Specified for periodic Flows only.'
 																)
 																.optional(),
-															source_id: z
-																.string()
-																.regex(
-																	new RegExp(
-																		'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-																	)
-																)
+															source_id: idPrimitive
 																.describe(
 																	'Globally unique identifier for the Source which initially created the Flow. This attribute is used to ensure referential integrity by registry implementations (v1.0 only).'
 																),
-															device_id: z
-																.string()
-																.regex(
-																	new RegExp(
-																		'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-																	)
-																)
+															device_id: idPrimitive
 																.describe(
 																	'Globally unique identifier for the Device which initially created the Flow. This attribute is used to ensure referential integrity by registry implementations (v1.1 onwards).'
 																),
@@ -430,23 +407,11 @@ export default z
 																	'Number of Grains per second for this Flow. Must be an integer division of, or equal to the Grain rate specified by the parent Source. Grain rate matches the frame rate for video (see NMOS Content Model). Specified for periodic Flows only.'
 																)
 																.optional(),
-															source_id: z
-																.string()
-																.regex(
-																	new RegExp(
-																		'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-																	)
-																)
+															source_id: idPrimitive
 																.describe(
 																	'Globally unique identifier for the Source which initially created the Flow. This attribute is used to ensure referential integrity by registry implementations (v1.0 only).'
 																),
-															device_id: z
-																.string()
-																.regex(
-																	new RegExp(
-																		'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-																	)
-																)
+															device_id: idPrimitive
 																.describe(
 																	'Globally unique identifier for the Device which initially created the Flow. This attribute is used to ensure referential integrity by registry implementations (v1.1 onwards).'
 																),
@@ -572,23 +537,11 @@ export default z
 																	'Number of Grains per second for this Flow. Must be an integer division of, or equal to the Grain rate specified by the parent Source. Grain rate matches the frame rate for video (see NMOS Content Model). Specified for periodic Flows only.'
 																)
 																.optional(),
-															source_id: z
-																.string()
-																.regex(
-																	new RegExp(
-																		'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-																	)
-																)
+															source_id: idPrimitive
 																.describe(
 																	'Globally unique identifier for the Source which initially created the Flow. This attribute is used to ensure referential integrity by registry implementations (v1.0 only).'
 																),
-															device_id: z
-																.string()
-																.regex(
-																	new RegExp(
-																		'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-																	)
-																)
+															device_id: idPrimitive
 																.describe(
 																	'Globally unique identifier for the Device which initially created the Flow. This attribute is used to ensure referential integrity by registry implementations (v1.1 onwards).'
 																),
@@ -649,13 +602,7 @@ export default z
 										z.intersection(
 											z
 												.object({
-													id: z
-														.string()
-														.regex(
-															new RegExp(
-																'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-															)
-														)
+													id: idPrimitive
 														.describe('Globally unique identifier for the resource'),
 													version: z
 														.string()
@@ -709,35 +656,17 @@ export default z
 														'Number of Grains per second for this Flow. Must be an integer division of, or equal to the Grain rate specified by the parent Source. Grain rate matches the frame rate for video (see NMOS Content Model). Specified for periodic Flows only.'
 													)
 													.optional(),
-												source_id: z
-													.string()
-													.regex(
-														new RegExp(
-															'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-														)
-													)
+												source_id: idPrimitive
 													.describe(
 														'Globally unique identifier for the Source which initially created the Flow. This attribute is used to ensure referential integrity by registry implementations (v1.0 only).'
 													),
-												device_id: z
-													.string()
-													.regex(
-														new RegExp(
-															'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-														)
-													)
+												device_id: idPrimitive
 													.describe(
 														'Globally unique identifier for the Device which initially created the Flow. This attribute is used to ensure referential integrity by registry implementations (v1.1 onwards).'
 													),
 												parents: z
 													.array(
-														z
-															.string()
-															.regex(
-																new RegExp(
-																	'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-																)
-															)
+														idPrimitive
 													)
 													.describe(
 														'Array of UUIDs representing the Flow IDs of Grains which came together to generate this Flow (may change over the lifetime of this Flow)'
@@ -773,13 +702,7 @@ export default z
 										z.intersection(
 											z
 												.object({
-													id: z
-														.string()
-														.regex(
-															new RegExp(
-																'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-															)
-														)
+													id: idPrimitive
 														.describe('Globally unique identifier for the resource'),
 													version: z
 														.string()
@@ -833,35 +756,17 @@ export default z
 														'Number of Grains per second for this Flow. Must be an integer division of, or equal to the Grain rate specified by the parent Source. Grain rate matches the frame rate for video (see NMOS Content Model). Specified for periodic Flows only.'
 													)
 													.optional(),
-												source_id: z
-													.string()
-													.regex(
-														new RegExp(
-															'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-														)
-													)
+												source_id: idPrimitive
 													.describe(
 														'Globally unique identifier for the Source which initially created the Flow. This attribute is used to ensure referential integrity by registry implementations (v1.0 only).'
 													),
-												device_id: z
-													.string()
-													.regex(
-														new RegExp(
-															'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-														)
-													)
+												device_id: idPrimitive
 													.describe(
 														'Globally unique identifier for the Device which initially created the Flow. This attribute is used to ensure referential integrity by registry implementations (v1.1 onwards).'
 													),
 												parents: z
 													.array(
-														z
-															.string()
-															.regex(
-																new RegExp(
-																	'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-																)
-															)
+														idPrimitive
 													)
 													.describe(
 														'Array of UUIDs representing the Flow IDs of Grains which came together to generate this Flow (may change over the lifetime of this Flow)'
@@ -908,13 +813,7 @@ export default z
 										z.intersection(
 											z
 												.object({
-													id: z
-														.string()
-														.regex(
-															new RegExp(
-																'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-															)
-														)
+													id: idPrimitive
 														.describe('Globally unique identifier for the resource'),
 													version: z
 														.string()
@@ -968,35 +867,17 @@ export default z
 														'Number of Grains per second for this Flow. Must be an integer division of, or equal to the Grain rate specified by the parent Source. Grain rate matches the frame rate for video (see NMOS Content Model). Specified for periodic Flows only.'
 													)
 													.optional(),
-												source_id: z
-													.string()
-													.regex(
-														new RegExp(
-															'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-														)
-													)
+												source_id: idPrimitive
 													.describe(
 														'Globally unique identifier for the Source which initially created the Flow. This attribute is used to ensure referential integrity by registry implementations (v1.0 only).'
 													),
-												device_id: z
-													.string()
-													.regex(
-														new RegExp(
-															'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-														)
-													)
+												device_id: idPrimitive
 													.describe(
 														'Globally unique identifier for the Device which initially created the Flow. This attribute is used to ensure referential integrity by registry implementations (v1.1 onwards).'
 													),
 												parents: z
 													.array(
-														z
-															.string()
-															.regex(
-																new RegExp(
-																	'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-																)
-															)
+														idPrimitive
 													)
 													.describe(
 														'Array of UUIDs representing the Flow IDs of Grains which came together to generate this Flow (may change over the lifetime of this Flow)'
@@ -1030,13 +911,7 @@ export default z
 										z.intersection(
 											z
 												.object({
-													id: z
-														.string()
-														.regex(
-															new RegExp(
-																'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-															)
-														)
+													id: idPrimitive
 														.describe('Globally unique identifier for the resource'),
 													version: z
 														.string()
@@ -1090,35 +965,17 @@ export default z
 														'Number of Grains per second for this Flow. Must be an integer division of, or equal to the Grain rate specified by the parent Source. Grain rate matches the frame rate for video (see NMOS Content Model). Specified for periodic Flows only.'
 													)
 													.optional(),
-												source_id: z
-													.string()
-													.regex(
-														new RegExp(
-															'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-														)
-													)
+												source_id: idPrimitive
 													.describe(
 														'Globally unique identifier for the Source which initially created the Flow. This attribute is used to ensure referential integrity by registry implementations (v1.0 only).'
 													),
-												device_id: z
-													.string()
-													.regex(
-														new RegExp(
-															'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-														)
-													)
+												device_id: idPrimitive
 													.describe(
 														'Globally unique identifier for the Device which initially created the Flow. This attribute is used to ensure referential integrity by registry implementations (v1.1 onwards).'
 													),
 												parents: z
 													.array(
-														z
-															.string()
-															.regex(
-																new RegExp(
-																	'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-																)
-															)
+														idPrimitive
 													)
 													.describe(
 														'Array of UUIDs representing the Flow IDs of Grains which came together to generate this Flow (may change over the lifetime of this Flow)'

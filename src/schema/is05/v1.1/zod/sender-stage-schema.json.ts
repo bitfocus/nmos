@@ -4,9 +4,7 @@ export default z
 	.object({
 		receiver_id: z
 			.union([
-				z
-					.string()
-					.regex(new RegExp('^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'))
+				idPrimitive
 					.describe(
 						'ID of the target Receiver of this Sender. This will be null if the sender is operating in multicast mode, or has not been assigned a receiver in unicast mode, or is sending to a non-NMOS receiver in unicast mode.'
 					),

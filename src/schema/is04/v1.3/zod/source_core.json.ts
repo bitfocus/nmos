@@ -1,47 +1,12 @@
 import { z } from 'zod'
+import { _nmosResourceBase } from './_nnosResourceBase'
+import { idPrimitive } from './_primitives'
 
 export default z
 	.record(z.any())
 	.and(
 		z.intersection(
-			z
-				.object({
-					id: z
-						.string()
-						.regex(new RegExp('^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'))
-						.describe('Globally unique identifier for the resource'),
-					version: z
-						.string()
-						.regex(new RegExp('^[0-9]+:[0-9]+$'))
-						.describe(
-							'String formatted TAI timestamp (<seconds>:<nanoseconds>) indicating precisely when an attribute of the resource last changed'
-						),
-					label: z.string().describe('Freeform string label for the resource'),
-					description: z.string().describe('Detailed description of the resource'),
-					tags: z
-						.record(z.array(z.string()))
-						.superRefine((value, ctx) => {
-							for (const key in value) {
-								if (key.match(new RegExp(''))) {
-									const result = z.array(z.string()).safeParse(value[key])
-									if (!result.success) {
-										ctx.addIssue({
-											path: [...ctx.path, key],
-											code: 'custom',
-											message: `Invalid input: Key matching regex /${key}/ must match schema`,
-											params: {
-												issues: result.error.issues,
-											},
-										})
-									}
-								}
-							}
-						})
-						.describe(
-							'Key value set of freeform string tags to aid in filtering resources. Values should be represented as an array of strings. Can be empty.'
-						),
-				})
-				.describe('Describes the foundations of all NMOS resources'),
+			_nmosResourceBase,
 			z.object({
 				grain_rate: z
 					.object({
@@ -53,19 +18,13 @@ export default z
 					)
 					.optional(),
 				caps: z.record(z.any()).describe('Capabilities (not yet defined)'),
-				device_id: z
-					.string()
-					.regex(new RegExp('^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'))
+				device_id: idPrimitive
 					.describe(
 						'Globally unique identifier for the Device which initially created the Source. This attribute is used to ensure referential integrity by registry implementations.'
 					),
 				parents: z
 					.array(
-						z
-							.string()
-							.regex(
-								new RegExp('^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$')
-							)
+						idPrimitive
 					)
 					.describe(
 						'Array of UUIDs representing the Source IDs of Grains which came together at the input to this Source (may change over the lifetime of this Source)'

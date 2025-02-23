@@ -17,13 +17,7 @@ export default z
 											z.intersection(
 												z
 													.object({
-														id: z
-															.string()
-															.regex(
-																new RegExp(
-																	'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-																)
-															)
+														id: idPrimitive
 															.describe('Globally unique identifier for the resource'),
 														version: z
 															.string()
@@ -78,25 +72,13 @@ export default z
 														)
 														.optional(),
 													caps: z.record(z.any()).describe('Capabilities (not yet defined)'),
-													device_id: z
-														.string()
-														.regex(
-															new RegExp(
-																'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-															)
-														)
+													device_id: idPrimitive
 														.describe(
 															'Globally unique identifier for the Device which initially created the Source. This attribute is used to ensure referential integrity by registry implementations.'
 														),
 													parents: z
 														.array(
-															z
-																.string()
-																.regex(
-																	new RegExp(
-																		'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-																	)
-																)
+															idPrimitive
 														)
 														.describe(
 															'Array of UUIDs representing the Source IDs of Grains which came together at the input to this Source (may change over the lifetime of this Source)'
@@ -134,13 +116,7 @@ export default z
 											z.intersection(
 												z
 													.object({
-														id: z
-															.string()
-															.regex(
-																new RegExp(
-																	'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-																)
-															)
+														id: idPrimitive
 															.describe('Globally unique identifier for the resource'),
 														version: z
 															.string()
@@ -195,25 +171,13 @@ export default z
 														)
 														.optional(),
 													caps: z.record(z.any()).describe('Capabilities (not yet defined)'),
-													device_id: z
-														.string()
-														.regex(
-															new RegExp(
-																'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-															)
-														)
+													device_id: idPrimitive
 														.describe(
 															'Globally unique identifier for the Device which initially created the Source. This attribute is used to ensure referential integrity by registry implementations.'
 														),
 													parents: z
 														.array(
-															z
-																.string()
-																.regex(
-																	new RegExp(
-																		'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-																	)
-																)
+															idPrimitive
 														)
 														.describe(
 															'Array of UUIDs representing the Source IDs of Grains which came together at the input to this Source (may change over the lifetime of this Source)'
@@ -297,13 +261,7 @@ export default z
 											z.intersection(
 												z
 													.object({
-														id: z
-															.string()
-															.regex(
-																new RegExp(
-																	'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-																)
-															)
+														id: idPrimitive
 															.describe('Globally unique identifier for the resource'),
 														version: z
 															.string()
@@ -358,25 +316,13 @@ export default z
 														)
 														.optional(),
 													caps: z.record(z.any()).describe('Capabilities (not yet defined)'),
-													device_id: z
-														.string()
-														.regex(
-															new RegExp(
-																'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-															)
-														)
+													device_id: idPrimitive
 														.describe(
 															'Globally unique identifier for the Device which initially created the Source. This attribute is used to ensure referential integrity by registry implementations.'
 														),
 													parents: z
 														.array(
-															z
-																.string()
-																.regex(
-																	new RegExp(
-																		'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-																	)
-																)
+															idPrimitive
 														)
 														.describe(
 															'Array of UUIDs representing the Source IDs of Grains which came together at the input to this Source (may change over the lifetime of this Source)'

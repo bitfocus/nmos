@@ -4,9 +4,7 @@ export default z
 	.array(
 		z
 			.object({
-				id: z
-					.string()
-					.regex(new RegExp('^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'))
+				id: idPrimitive
 					.describe('Globally unique identifier for the Device'),
 				version: z
 					.string()
@@ -16,9 +14,7 @@ export default z
 					),
 				label: z.string().describe('Freeform string label for the Device'),
 				type: z.string().url().describe('Device type URN'),
-				node_id: z
-					.string()
-					.regex(new RegExp('^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'))
+				node_id: idPrimitive
 					.describe('Globally unique identifier for the Node which initially created the Device'),
 				senders: z
 					.array(

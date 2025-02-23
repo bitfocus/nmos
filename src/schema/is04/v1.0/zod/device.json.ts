@@ -20,16 +20,12 @@ export default z
 			.describe('Globally unique identifier for the Node which initially created the Device'),
 		senders: z
 			.array(
-				z
-					.string()
-					.regex(new RegExp('^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'))
+				idPrimitive
 			)
 			.describe('UUIDs of Senders attached to the Device'),
 		receivers: z
 			.array(
-				z
-					.string()
-					.regex(new RegExp('^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'))
+				idPrimitive
 			)
 			.describe('UUIDs of Receivers attached to the Device'),
 	})

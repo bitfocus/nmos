@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { idPrimitive } from './_primitives'
 
 export default z
 	.array(
@@ -8,13 +9,7 @@ export default z
 				z.intersection(
 					z
 						.object({
-							id: z
-								.string()
-								.regex(
-									new RegExp(
-										'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-									)
-								)
+							id: idPrimitive
 								.describe('Globally unique identifier for the resource'),
 							version: z
 								.string()
@@ -78,34 +73,18 @@ export default z
 								}
 							})
 							.describe('Device type URN'),
-						node_id: z
-							.string()
-							.regex(
-								new RegExp('^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$')
-							)
+						node_id: idPrimitive
 							.describe(
 								'Globally unique identifier for the Node which initially created the Device. This attribute is used to ensure referential integrity by registry implementations.'
 							),
 						senders: z
 							.array(
-								z
-									.string()
-									.regex(
-										new RegExp(
-											'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-										)
-									)
+								idPrimitive
 							)
 							.describe('UUIDs of Senders attached to the Device (deprecated)'),
 						receivers: z
 							.array(
-								z
-									.string()
-									.regex(
-										new RegExp(
-											'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-										)
-									)
+								idPrimitive
 							)
 							.describe('UUIDs of Receivers attached to the Device (deprecated)'),
 						controls: z

@@ -3,29 +3,22 @@ import { z } from 'zod'
 export default z
 	.object({
 		grain_type: z.literal('event').describe("Type of data contained within the 'grain' attribute's payload"),
-		source_id: z
-			.string()
-			.regex(new RegExp('^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'))
+		source_id: idPrimitive
 			.describe('Source ID of the Query API instance issuing the data Grain'),
-		flow_id: z
-			.string()
-			.regex(new RegExp('^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'))
+		flow_id: idPrimitive
 			.describe('Subscription ID under the /subscriptions/ resource of the Query API'),
 		origin_timestamp: z
-			.string()
-			.regex(new RegExp('^[0-9]+:[0-9]+$'))
+			versionPrimitive
 			.describe(
 				"TAI timestamp at which this data Grain's payload was generated in the format <ts_secs>:<ts_nsecs>"
 			),
 		sync_timestamp: z
-			.string()
-			.regex(new RegExp('^[0-9]+:[0-9]+$'))
+			versionPrimitive
 			.describe(
 				"TAI timestamp at which this data Grain's payload was generated in the format <ts_secs>:<ts_nsecs>"
 			),
 		creation_timestamp: z
-			.string()
-			.regex(new RegExp('^[0-9]+:[0-9]+$'))
+			versionPrimitive
 			.describe(
 				"TAI timestamp at which this data Grain's metadata was generated in the format <ts_secs>:<ts_nsecs>"
 			),
@@ -53,13 +46,7 @@ export default z
 					.array(
 						z
 							.object({
-								path: z
-									.string()
-									.regex(
-										new RegExp(
-											'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-										)
-									)
+								path: idPrimitive
 									.describe(
 										'ID of the resource which has undergone a change (may be a Node ID, Device ID etc.)'
 									),

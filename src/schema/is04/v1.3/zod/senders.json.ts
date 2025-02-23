@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { idPrimitive } from './_primitives'
 
 export default z
 	.array(
@@ -8,13 +9,7 @@ export default z
 				z.intersection(
 					z
 						.object({
-							id: z
-								.string()
-								.regex(
-									new RegExp(
-										'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-									)
-								)
+							id: idPrimitive
 								.describe('Globally unique identifier for the resource'),
 							version: z
 								.string()
@@ -52,13 +47,7 @@ export default z
 						caps: z.object({}).describe('Capabilities of this sender').optional(),
 						flow_id: z
 							.union([
-								z
-									.string()
-									.regex(
-										new RegExp(
-											'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-										)
-									)
+								idPrimitive
 									.describe(
 										'ID of the Flow currently passing via this Sender. Set to null when a Flow is not currently internally routed to the Sender.'
 									),
@@ -102,11 +91,7 @@ export default z
 								}
 							})
 							.describe('Transport type used by the Sender in URN format'),
-						device_id: z
-							.string()
-							.regex(
-								new RegExp('^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$')
-							)
+						device_id: idPrimitive
 							.describe(
 								'Device ID which this Sender forms part of. This attribute is used to ensure referential integrity by registry implementations.'
 							),
@@ -134,13 +119,7 @@ export default z
 							.object({
 								receiver_id: z
 									.union([
-										z
-											.string()
-											.regex(
-												new RegExp(
-													'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-												)
-											)
+										idPrimitive
 											.describe(
 												'UUID of the Receiver to which this Sender is currently configured to send data. Only set if it is active, uses a unicast push-based transport and is sending to an NMOS Receiver; otherwise null.'
 											),

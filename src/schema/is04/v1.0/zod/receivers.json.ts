@@ -4,9 +4,7 @@ export default z
 	.array(
 		z
 			.object({
-				id: z
-					.string()
-					.regex(new RegExp('^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'))
+				id: idPrimitive
 					.describe('Globally unique identifier for the Receiver'),
 				version: z
 					.string()
@@ -42,9 +40,7 @@ export default z
 					.describe(
 						'Key value set of freeform string tags to aid in filtering sources. Values should be represented as an array of strings. Can be empty.'
 					),
-				device_id: z
-					.string()
-					.regex(new RegExp('^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'))
+				device_id: idPrimitive
 					.describe('Device ID which this Receiver forms part of'),
 				transport: z
 					.enum([
