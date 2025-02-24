@@ -1,4 +1,5 @@
-import { z } from "zod/lib/external";
+import { z } from "zod";
+
 
 export const _audioChannels = z.array(
     z.object({
