@@ -1,6 +1,6 @@
-import NMOS from '../src/index'
+import NMOSNode from '../src/index'
 
-const nmos = new NMOS({
+const nmos = new NMOSNode({
 	protocol: 'http',
 	host: '10.0.0.3',
 	port: 8090,
