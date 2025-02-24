@@ -45,4 +45,7 @@ export const _audioChannels = z.array(
             ),
     })
 )
-.min(1)
+    .min(1)
+export const _macAdressPrimitive = z
+    .string()
+    .regex(new RegExp('^([0-9a-f]{2}-){5}([0-9a-f]{2})$'))

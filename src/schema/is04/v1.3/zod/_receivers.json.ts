@@ -5,15 +5,10 @@ import { _receiverBase } from './_receiverBase'
 import { _receiverVideoCore } from './_receiverVideoCore'
 import { _receiverAudioCore } from './_receiverAudioCore'
 import { _receiverDataCore } from './_receiverDataCore'
+import _nmosReceiver from './_receiver.json'
 
 export default z
 	.array(
-		_nmosResourceBase.and(_receiverBase).and(
-			z.discriminatedUnion('format', [
-				_receiverAudioCore,
-				_receiverVideoCore,
-				_receiverDataCore
-			])
-		)
+		_nmosReceiver
 	)
 	.describe('A list of Receiver resources')

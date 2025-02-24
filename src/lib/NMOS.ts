@@ -42,10 +42,10 @@ export class NMOSRuntime {
 				}
 			}
 			const parse = await endpoint.safeParseAsync(result.data)
-			
+
 			if (!parse.success) {
-				parse.error.errors.forEach((error)=>{
-					console.error(error.path.join('.')+': '+error.message, 'received', _.get(result.data, error.path.join('.')))
+				parse.error.errors.forEach((error) => {
+					console.error('Validation error ['+path+']', error.path.join('.') + ': ' + error.message, 'received', _.get(result.data, error.path.join('.')))
 				})
 
 				if (this.options.strict) {
@@ -54,7 +54,7 @@ export class NMOSRuntime {
 			}
 
 			return parse.data as z.infer<typeof endpoint>
-				
+
 		} catch (error) {
 			console.error('error', error)
 		}
