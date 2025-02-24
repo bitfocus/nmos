@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { idPrimitive } from './_primitives'
+import { _audioChannels, idPrimitive } from './_primitives'
 import { URNControlSchema } from './_urns'
 
 export default z
@@ -1560,56 +1560,7 @@ export default z
 													format: z
 														.literal('urn:x-nmos:format:audio')
 														.describe('Format of the data coming from the Source as a URN'),
-													channels: z
-														.array(
-															z.object({
-																label: z
-																	.string()
-																	.describe('Label for this channel (free text)'),
-																symbol: z
-																	.union([
-																		z.enum([
-																			'L',
-																			'R',
-																			'C',
-																			'LFE',
-																			'Ls',
-																			'Rs',
-																			'Lss',
-																			'Rss',
-																			'Lrs',
-																			'Rrs',
-																			'Lc',
-																			'Rc',
-																			'Cs',
-																			'HI',
-																			'VIN',
-																			'M1',
-																			'M2',
-																			'Lt',
-																			'Rt',
-																			'Lst',
-																			'Rst',
-																			'S',
-																		]),
-																		z
-																			.string()
-																			.regex(
-																				/^NSC(0[0-9][0-9]|1[0-1][0-9]|12[0-8])$/
-																			)
-																			.describe('Numbered Source Channel'),
-																		z
-																			.string()
-																			.regex(/^U(0[1-9]|[1-5][0-9]|6[0-4])$/)
-																			.describe('Undefined channel'),
-																	])
-																	.describe(
-																		'Symbol for this channel (from VSF TR-03 Appendix A)'
-																	)
-																	.optional(),
-															})
-														)
-														.min(1)
+													channels: _audioChannels
 														.describe('Array of objects describing the audio channels'),
 												})
 											)

@@ -39,8 +39,7 @@ export const _audioChannels = z.array(
                     .string()
                     .regex(/^U(0[1-9]|[1-5][0-9]|6[0-4])$/)
                     .describe('Undefined channel'),
-            ]).optional()
-            .describe(
+            ]).optional().describe(
                 'Symbol for this channel (from VSF TR-03 Appendix A)'
             ),
     })

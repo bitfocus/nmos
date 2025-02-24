@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { idPrimitive, versionPrimitive } from '../../v1.2/zod/_primitives'
 import { URNControlSchema } from './_urns'
+import { _audioChannels } from './_primitives'
 
 export default z
 	.object({
@@ -917,103 +918,7 @@ export default z
 																					.describe(
 																						'Format of the data coming from the Source as a URN'
 																					),
-																				channels: z
-																					.array(
-																						z.object({
-																							label: z
-																								.string()
-																								.describe(
-																									'Label for this channel (free text)'
-																								),
-																							symbol: z
-																								.any()
-																								.superRefine(
-																									(x, ctx) => {
-																										const schemas =
-																											[
-																												z.enum([
-																													'L',
-																													'R',
-																													'C',
-																													'LFE',
-																													'Ls',
-																													'Rs',
-																													'Lss',
-																													'Rss',
-																													'Lrs',
-																													'Rrs',
-																													'Lc',
-																													'Rc',
-																													'Cs',
-																													'HI',
-																													'VIN',
-																													'M1',
-																													'M2',
-																													'Lt',
-																													'Rt',
-																													'Lst',
-																													'Rst',
-																													'S',
-																												]),
-																												z
-																													.any()
-																													.describe(
-																														'Numbered Source Channel'
-																													),
-																												z
-																													.any()
-																													.describe(
-																														'Undefined channel'
-																													),
-																											]
-																										const errors =
-																											schemas.reduce<
-																												z.ZodError[]
-																											>(
-																												(
-																													errors,
-																													schema
-																												) =>
-																													((
-																														result
-																													) =>
-																														result.error
-																															? [
-																																	...errors,
-																																	result.error,
-																																]
-																															: errors)(
-																														schema.safeParse(
-																															x
-																														)
-																													),
-																												[]
-																											)
-																										if (
-																											schemas.length -
-																												errors.length !==
-																											1
-																										) {
-																											ctx.addIssue(
-																												{
-																													path: ctx.path,
-																													code: 'invalid_union',
-																													unionErrors:
-																														errors,
-																													message:
-																														'Invalid input: Should pass single schema',
-																												}
-																											)
-																										}
-																									}
-																								)
-																								.describe(
-																									'Symbol for this channel (from VSF TR-03 Appendix A)'
-																								)
-																								.optional(),
-																						})
-																					)
-																					.min(1)
+																				channels: _audioChannels
 																					.describe(
 																						'Array of objects describing the audio channels'
 																					),
@@ -5022,103 +4927,7 @@ export default z
 																					.describe(
 																						'Format of the data coming from the Source as a URN'
 																					),
-																				channels: z
-																					.array(
-																						z.object({
-																							label: z
-																								.string()
-																								.describe(
-																									'Label for this channel (free text)'
-																								),
-																							symbol: z
-																								.any()
-																								.superRefine(
-																									(x, ctx) => {
-																										const schemas =
-																											[
-																												z.enum([
-																													'L',
-																													'R',
-																													'C',
-																													'LFE',
-																													'Ls',
-																													'Rs',
-																													'Lss',
-																													'Rss',
-																													'Lrs',
-																													'Rrs',
-																													'Lc',
-																													'Rc',
-																													'Cs',
-																													'HI',
-																													'VIN',
-																													'M1',
-																													'M2',
-																													'Lt',
-																													'Rt',
-																													'Lst',
-																													'Rst',
-																													'S',
-																												]),
-																												z
-																													.any()
-																													.describe(
-																														'Numbered Source Channel'
-																													),
-																												z
-																													.any()
-																													.describe(
-																														'Undefined channel'
-																													),
-																											]
-																										const errors =
-																											schemas.reduce<
-																												z.ZodError[]
-																											>(
-																												(
-																													errors,
-																													schema
-																												) =>
-																													((
-																														result
-																													) =>
-																														result.error
-																															? [
-																																	...errors,
-																																	result.error,
-																																]
-																															: errors)(
-																														schema.safeParse(
-																															x
-																														)
-																													),
-																												[]
-																											)
-																										if (
-																											schemas.length -
-																												errors.length !==
-																											1
-																										) {
-																											ctx.addIssue(
-																												{
-																													path: ctx.path,
-																													code: 'invalid_union',
-																													unionErrors:
-																														errors,
-																													message:
-																														'Invalid input: Should pass single schema',
-																												}
-																											)
-																										}
-																									}
-																								)
-																								.describe(
-																									'Symbol for this channel (from VSF TR-03 Appendix A)'
-																								)
-																								.optional(),
-																						})
-																					)
-																					.min(1)
+																				channels: _audioChannels
 																					.describe(
 																						'Array of objects describing the audio channels'
 																					),
