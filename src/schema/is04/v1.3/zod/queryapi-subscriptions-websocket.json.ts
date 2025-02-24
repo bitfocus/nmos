@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { idPrimitive, versionPrimitive } from '../../v1.2/zod/_primitives'
 import { URNControlSchema } from './_urns'
-import { _audioChannels } from './_primitives'
+import { _audioChannels } from "./_propAudioChannels"
 
 export default z
 	.object({

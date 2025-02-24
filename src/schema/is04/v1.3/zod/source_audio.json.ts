@@ -1,5 +1,6 @@
 import { z } from 'zod'
-import { _audioChannels, idPrimitive, versionPrimitive } from './_primitives'
+import { idPrimitive, versionPrimitive } from './_primitives'
+import { _audioChannels } from "./_propAudioChannels"
 
 export default z
 	.record(z.any())
