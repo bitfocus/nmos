@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { _nmosResourceBase } from '../../v1.3/zod/_nnosResourceBase'
 import { idPrimitive } from '../../v1.3/zod/_primitives'
+import { URNControlSchema } from '../../v1.3/zod/_urns'
 
 export default z
 	.record(z.any())
@@ -64,7 +65,7 @@ export default z
 								.string()
 								.url()
 								.describe('URL to reach a control endpoint, whether http or otherwise'),
-							type: z.string().url().describe('URN identifying the control format'),
+							type: URNControlSchema.describe('URN identifying the control format'),
 						})
 					)
 					.describe('Control endpoints exposed for the Device'),

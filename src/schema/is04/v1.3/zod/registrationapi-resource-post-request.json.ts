@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { idPrimitive } from './_primitives'
+import { URNControlSchema } from './_urns'
 
 export default z
 	.record(z.any())
@@ -345,13 +346,11 @@ export default z
 									controls: z
 										.array(
 											z.object({
-												href: z
-													.string()
-													.url()
+												href: URNControlSchema
 													.describe(
 														'URL to reach a control endpoint, whether http or otherwise'
 													),
-												type: z.string().url().describe('URN identifying the control format'),
+												type: URNControlSchema.describe('URN identifying the control format'),
 												authorization: z
 													.boolean()
 													.describe('This endpoint requires authorization')

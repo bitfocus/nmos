@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { URNControlSchema } from '../../v1.3/zod/_urns'
 
 export default z
 	.object({
@@ -426,9 +427,7 @@ export default z
 																				.describe(
 																					'URL to reach a control endpoint, whether http or otherwise'
 																				),
-																			type: z
-																				.string()
-																				.url()
+																			type: URNControlSchema
 																				.describe(
 																					'URN identifying the control format'
 																				),
@@ -3948,9 +3947,7 @@ export default z
 																				.describe(
 																					'URL to reach a control endpoint, whether http or otherwise'
 																				),
-																			type: z
-																				.string()
-																				.url()
+																			type: URNControlSchema
 																				.describe(
 																					'URN identifying the control format'
 																				),

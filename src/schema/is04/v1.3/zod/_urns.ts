@@ -25,6 +25,7 @@ export const URNServiceSchema = z.union([
 export const URNControlSchema = z.union([
     z.literal('urn:x-nmos:control:sr-ctrl/v1.0'),
     z.literal('urn:x-nmos:control:sr-ctrl/v1.1'),
+    z.literal('urn:x-nmos:control:cm-ctrl/v1.0'),
     z.literal('urn:x-nmos:control:manifest-base/v1.0'),
     z.literal('urn:x-nmos:control:events/v1.0'),
 ])
