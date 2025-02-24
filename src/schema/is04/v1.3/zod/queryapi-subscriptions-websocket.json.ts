@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { idPrimitive, versionPrimitive } from '../../v1.2/zod/_primitives'
 
 export default z
 	.object({
@@ -7,17 +8,17 @@ export default z
 			.describe('Source ID of the Query API instance issuing the data Grain'),
 		flow_id: idPrimitive
 			.describe('Subscription ID under the /subscriptions/ resource of the Query API'),
-		origin_timestamp: z
+		origin_timestamp: 
 			versionPrimitive
 			.describe(
 				"TAI timestamp at which this data Grain's payload was generated in the format <ts_secs>:<ts_nsecs>"
 			),
-		sync_timestamp: z
+		sync_timestamp: 
 			versionPrimitive
 			.describe(
 				"TAI timestamp at which this data Grain's payload was generated in the format <ts_secs>:<ts_nsecs>"
 			),
-		creation_timestamp: z
+		creation_timestamp: 
 			versionPrimitive
 			.describe(
 				"TAI timestamp at which this data Grain's metadata was generated in the format <ts_secs>:<ts_nsecs>"
