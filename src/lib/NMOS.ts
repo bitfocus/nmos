@@ -1,7 +1,8 @@
 import { NMOSRuntimeOptions } from './types'
 import { Axios } from 'axios'
 import { endpoints } from '../schema'
-import { z } from 'zod'
+import { z, ZodError } from 'zod'
+import _ from 'lodash'
 
 type Endpoints = typeof endpoints
 export type EndpointTypes = keyof typeof endpoints
@@ -40,16 +41,20 @@ export class NMOSRuntime {
 					throw new Error('Failed to parse JSON')
 				}
 			}
-			try {
-				const parse = await endpoint.parseAsync(result.data)
-				return result.data
-			} catch (error) {
-				console.error('Schema validation failed', resolvedPath, error)
+			const parse = await endpoint.safeParseAsync(result.data)
+			
+			if (!parse.success) {
+				parse.error.errors.forEach((error)=>{
+					console.error(error.path.join('.')+': '+error.message, 'received', _.get(result.data, error.path.join('.')))
+				})
+
 				if (this.options.strict) {
 					throw new Error('Strict mode enabled, failed to parse data')
 				}
 			}
-			return result.data
+
+			return parse.data as z.infer<typeof endpoint>
+				
 		} catch (error) {
 			console.error('error', error)
 		}

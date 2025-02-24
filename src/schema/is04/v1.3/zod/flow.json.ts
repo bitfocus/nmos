@@ -25,7 +25,6 @@ export default
 	]))
 	.and(z.discriminatedUnion('media_type', [
 		// data
-		_flowDataGenericCore,
 		_flowDataJSONCore,
 		_flowDataSDIAncillaryCore,
 
@@ -36,6 +35,5 @@ export default
 
 		// audio
 		_flowAudioRaw,
-		_flowAudioCoded,
 	]))
 		.describe('Describes a Flow')
