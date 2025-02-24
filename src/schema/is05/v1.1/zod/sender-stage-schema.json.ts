@@ -3,30 +3,11 @@ import { idPrimitive } from '../../../is04/v1.3/zod/_primitives'
 
 export default z
 	.object({
-		receiver_id: z
-			.union([
-				idPrimitive
-					.describe(
-						'ID of the target Receiver of this Sender. This will be null if the sender is operating in multicast mode, or has not been assigned a receiver in unicast mode, or is sending to a non-NMOS receiver in unicast mode.'
-					),
-				z
-					.null()
-					.describe(
-						'ID of the target Receiver of this Sender. This will be null if the sender is operating in multicast mode, or has not been assigned a receiver in unicast mode, or is sending to a non-NMOS receiver in unicast mode.'
-					),
-			])
-			.describe(
-				'ID of the target Receiver of this Sender. This will be null if the sender is operating in multicast mode, or has not been assigned a receiver in unicast mode, or is sending to a non-NMOS receiver in unicast mode.'
-			)
-			.optional(),
+		receiver_id: idPrimitive.optional(),
 		master_enable: z.boolean().describe('Master on/off control for sender').optional(),
 		activation: z
 			.object({
-				mode: z
-					.union([
-						z.enum(['activate_immediate', 'activate_scheduled_absolute', 'activate_scheduled_relative']),
-						z.null(),
-					])
+				mode: z.enum(['activate_immediate', 'activate_scheduled_absolute', 'activate_scheduled_relative']).nullable()
 					.describe(
 						'Mode of activation: immediate (on message receipt), scheduled_absolute (when internal clock >= requested_time), scheduled_relative (when internal clock >= time of message receipt + requested_time), or null (no activation scheduled)'
 					),
@@ -36,10 +17,8 @@ export default z
 						"String formatted TAI timestamp (<seconds>:<nanoseconds>) indicating time (absolute or relative) for activation. Should be null or not present if 'mode' is null."
 					)
 					.optional(),
-			})
-			.strict()
-			.describe('Parameters concerned with activation of the transport parameters')
-			.optional(),
+			}).optional()
+			.describe('Parameters concerned with activation of the transport parameters'),
 		transport_params: z
 			.union([
 				z.array(
