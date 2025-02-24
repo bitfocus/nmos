@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { idPrimitive } from './_primitives'
 
 export default z
 	.record(z.any())
@@ -55,31 +56,26 @@ export default z
 								caps: z.object({}).describe('Capabilities of this sender').optional(),
 								flow_id: z
 									.union([
-										z
-											.string()
-											.regex(
-												new RegExp(
-													'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-												)
-											)
-											.describe('ID of the Flow currently passing via this Sender'),
+										idPrimitive
+											.describe(
+												'ID of the Flow currently passing via this Sender. Set to null when a Flow is not currently internally routed to the Sender.'
+											),
 										z
 											.null()
-											.describe('ID of the Flow currently passing via this Sender')
+											.describe(
+												'ID of the Flow currently passing via this Sender. Set to null when a Flow is not currently internally routed to the Sender.'
+											)
 											.default(null),
 									])
-									.describe('ID of the Flow currently passing via this Sender')
+									.describe(
+										'ID of the Flow currently passing via this Sender. Set to null when a Flow is not currently internally routed to the Sender.'
+									)
 									.default(null),
 								transport: z
 									.any()
 									.superRefine((x, ctx) => {
 										const schemas = [
-											z.enum([
-												'urn:x-nmos:transport:rtp',
-												'urn:x-nmos:transport:rtp.ucast',
-												'urn:x-nmos:transport:rtp.mcast',
-												'urn:x-nmos:transport:dash',
-											]),
+											z.any(),
 											z
 												.any()
 												.refine(
@@ -104,61 +100,56 @@ export default z
 										}
 									})
 									.describe('Transport type used by the Sender in URN format'),
-								device_id: z
-									.string()
-									.regex(
-										new RegExp(
-											'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-										)
-									)
+								device_id: idPrimitive
 									.describe(
 										'Device ID which this Sender forms part of. This attribute is used to ensure referential integrity by registry implementations.'
 									),
 								manifest_href: z
-									.string()
-									.url()
+									.union([
+										z
+											.string()
+											.url()
+											.describe(
+												'HTTP(S) accessible URL to a file describing how to connect to the Sender. Set to null when the transport type used by the Sender does not require a transport file.'
+											),
+										z
+											.null()
+											.describe(
+												'HTTP(S) accessible URL to a file describing how to connect to the Sender. Set to null when the transport type used by the Sender does not require a transport file.'
+											),
+									])
 									.describe(
-										"HTTP URL to a file describing how to connect to the Sender (SDP for RTP). The Sender's 'version' attribute should be updated if the contents of this file are modified. This URL may return an HTTP 404 where the 'active' parameter in the 'subscription' object is present and set to false (v1.2+ only)."
+										'HTTP(S) accessible URL to a file describing how to connect to the Sender. Set to null when the transport type used by the Sender does not require a transport file.'
 									),
 								interface_bindings: z
 									.array(z.string())
-									.describe(
-										"Binding of Sender egress ports to interfaces on the parent Node. Should contain a single network interface unless a redundancy mechanism such as ST.2022-7 is in use, in which case each 'leg' should have its matching interface listed. Where the redundancy mechanism sends more than one copy of the stream via the same interface, that interface should be listed a corresponding number of times."
-									),
+									.describe('Binding of Sender egress ports to interfaces on the parent Node.'),
 								subscription: z
 									.object({
 										receiver_id: z
 											.union([
-												z
-													.string()
-													.regex(
-														new RegExp(
-															'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-														)
-													)
+												idPrimitive
 													.describe(
-														'UUID of the Receiver that this Sender is currently subscribed to'
+														'UUID of the Receiver to which this Sender is currently configured to send data. Only set if it is active, uses a unicast push-based transport and is sending to an NMOS Receiver; otherwise null.'
 													),
 												z
 													.null()
 													.describe(
-														'UUID of the Receiver that this Sender is currently subscribed to'
+														'UUID of the Receiver to which this Sender is currently configured to send data. Only set if it is active, uses a unicast push-based transport and is sending to an NMOS Receiver; otherwise null.'
 													)
 													.default(null),
 											])
 											.describe(
-												'UUID of the Receiver that this Sender is currently subscribed to'
+												'UUID of the Receiver to which this Sender is currently configured to send data. Only set if it is active, uses a unicast push-based transport and is sending to an NMOS Receiver; otherwise null.'
 											)
 											.default(null),
 										active: z
 											.boolean()
-											.describe(
-												'Sender is enabled and configured to stream data to a single Receiver (unicast), or to the network via multicast or a pull-based mechanism'
-											)
+											.describe('Sender is enabled and configured to send data')
 											.default(false),
 									})
 									.describe(
-										"Object containing the 'receiver_id' currently subscribed to (unicast only). Receiver_id should be null on initialisation, or when connected to a non-NMOS unicast Receiver."
+										'Object indicating how this Sender is currently configured to send data.'
 									),
 							})
 						)

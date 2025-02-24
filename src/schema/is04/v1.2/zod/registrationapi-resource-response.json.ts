@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { idPrimitive } from './_primitives'
 
 export default z
 	.record(z.any())
@@ -78,6 +79,10 @@ export default z
 														.describe(
 															'Protocol supported by this instance of the Node API'
 														),
+													authorization: z
+														.boolean()
+														.describe('This endpoint requires authorization')
+														.default(false),
 												})
 											)
 											.describe('Host, port and protocol details required to connect to the API'),
@@ -92,6 +97,10 @@ export default z
 												.url()
 												.describe('URL to reach a service running on the Node'),
 											type: z.string().url().describe('URN identifying the type of service'),
+											authorization: z
+												.boolean()
+												.describe('This endpoint requires authorization')
+												.default(false),
 										})
 									)
 									.describe('Array of objects containing a URN format type and href'),
@@ -141,7 +150,7 @@ export default z
 													locked: z
 														.boolean()
 														.describe(
-															'Lock state of this clock to the external reference. If true, this device is slaved, otherwise it has no defined relationship to the external reference'
+															'Lock state of this clock to the external reference. If true, this device follows the external reference, otherwise it has no defined relationship to the external reference'
 														),
 												})
 												.describe('Describes a clock referenced to PTP'),
@@ -185,6 +194,46 @@ export default z
 												.describe(
 													'Name of the interface (unique in scope of this node).  This attribute is used by sub-resources of this node such as senders and receivers to refer to interfaces to which they are bound.'
 												),
+											attached_network_device: z
+												.object({
+													chassis_id: z
+														.union([
+															z
+																.string()
+																.regex(new RegExp('^([0-9a-f]{2}-){5}([0-9a-f]{2})$'))
+																.describe(
+																	'When the Chassis ID is a MAC address, use this format'
+																),
+															z
+																.string()
+																.regex(new RegExp('^.+$'))
+																.describe(
+																	'When the Chassis ID is anything other than a MAC address, a freeform string may be used'
+																),
+														])
+														.describe(
+															'Chassis ID of the attached network device, as signalled in LLDP received by this Node.'
+														),
+													port_id: z
+														.union([
+															z
+																.string()
+																.regex(new RegExp('^([0-9a-f]{2}-){5}([0-9a-f]{2})$'))
+																.describe(
+																	'When the Port ID is a MAC address, use this format'
+																),
+															z
+																.string()
+																.regex(new RegExp('^.+$'))
+																.describe(
+																	'When the Port ID is anything other than a MAC address, a freeform string may be used'
+																),
+														])
+														.describe(
+															'Port ID of the attached network device, as signalled in LLDP received by this Node.'
+														),
+												})
+												.optional(),
 										})
 									)
 									.describe(
@@ -245,7 +294,7 @@ export default z
 									.any()
 									.superRefine((x, ctx) => {
 										const schemas = [
-											z.enum(['urn:x-nmos:device:generic', 'urn:x-nmos:device:pipeline']),
+											z.any(),
 											z
 												.any()
 												.refine(
@@ -270,36 +319,18 @@ export default z
 										}
 									})
 									.describe('Device type URN'),
-								node_id: z
-									.string()
-									.regex(
-										new RegExp(
-											'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-										)
-									)
+								node_id: idPrimitive
 									.describe(
 										'Globally unique identifier for the Node which initially created the Device. This attribute is used to ensure referential integrity by registry implementations.'
 									),
 								senders: z
 									.array(
-										z
-											.string()
-											.regex(
-												new RegExp(
-													'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-												)
-											)
+										idPrimitive
 									)
 									.describe('UUIDs of Senders attached to the Device (deprecated)'),
 								receivers: z
 									.array(
-										z
-											.string()
-											.regex(
-												new RegExp(
-													'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-												)
-											)
+										idPrimitive
 									)
 									.describe('UUIDs of Receivers attached to the Device (deprecated)'),
 								controls: z
@@ -310,6 +341,10 @@ export default z
 												.url()
 												.describe('URL to reach a control endpoint, whether http or otherwise'),
 											type: z.string().url().describe('URN identifying the control format'),
+											authorization: z
+												.boolean()
+												.describe('This endpoint requires authorization')
+												.default(false),
 										})
 									)
 									.describe('Control endpoints exposed for the Device'),
@@ -399,13 +434,7 @@ export default z
 															caps: z
 																.record(z.any())
 																.describe('Capabilities (not yet defined)'),
-															device_id: z
-																.string()
-																.regex(
-																	new RegExp(
-																		'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-																	)
-																)
+															device_id: idPrimitive
 																.describe(
 																	'Globally unique identifier for the Device which initially created the Source. This attribute is used to ensure referential integrity by registry implementations.'
 																),
@@ -443,11 +472,7 @@ export default z
 												.describe('Describes a Source'),
 											z.object({
 												format: z
-													.enum([
-														'urn:x-nmos:format:video',
-														'urn:x-nmos:format:data',
-														'urn:x-nmos:format:mux',
-													])
+													.enum(['urn:x-nmos:format:video', 'urn:x-nmos:format:mux'])
 													.describe('Format of the data coming from the Source as a URN'),
 											})
 										)
@@ -530,13 +555,7 @@ export default z
 															caps: z
 																.record(z.any())
 																.describe('Capabilities (not yet defined)'),
-															device_id: z
-																.string()
-																.regex(
-																	new RegExp(
-																		'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-																	)
-																)
+															device_id: idPrimitive
 																.describe(
 																	'Globally unique identifier for the Device which initially created the Source. This attribute is used to ensure referential integrity by registry implementations.'
 																),
@@ -629,6 +648,131 @@ export default z
 										)
 									)
 									.describe('Describes an audio Source'),
+								z
+									.record(z.any())
+									.and(
+										z.intersection(
+											z
+												.record(z.any())
+												.and(
+													z.intersection(
+														z
+															.object({
+																id: z
+																	.string()
+																	.regex(
+																		new RegExp(
+																			'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
+																		)
+																	)
+																	.describe(
+																		'Globally unique identifier for the resource'
+																	),
+																version: z
+																	.string()
+																	.regex(new RegExp('^[0-9]+:[0-9]+$'))
+																	.describe(
+																		'String formatted TAI timestamp (<seconds>:<nanoseconds>) indicating precisely when an attribute of the resource last changed'
+																	),
+																label: z
+																	.string()
+																	.describe('Freeform string label for the resource'),
+																description: z
+																	.string()
+																	.describe('Detailed description of the resource'),
+																tags: z
+																	.record(z.array(z.string()))
+																	.superRefine((value, ctx) => {
+																		for (const key in value) {
+																			if (key.match(new RegExp(''))) {
+																				const result = z
+																					.array(z.string())
+																					.safeParse(value[key])
+																				if (!result.success) {
+																					ctx.addIssue({
+																						path: [...ctx.path, key],
+																						code: 'custom',
+																						message: `Invalid input: Key matching regex /${key}/ must match schema`,
+																						params: {
+																							issues: result.error.issues,
+																						},
+																					})
+																				}
+																			}
+																		}
+																	})
+																	.describe(
+																		'Key value set of freeform string tags to aid in filtering resources. Values should be represented as an array of strings. Can be empty.'
+																	),
+															})
+															.describe(
+																'Describes the foundations of all NMOS resources'
+															),
+														z.object({
+															grain_rate: z
+																.object({
+																	numerator: z.number().int().describe('Numerator'),
+																	denominator: z
+																		.number()
+																		.int()
+																		.describe('Denominator')
+																		.default(1),
+																})
+																.describe(
+																	'Maximum number of Grains per second for Flows derived from this Source. Corresponding Flow Grain rates may override this attribute. Grain rate matches the frame rate for video (see NMOS Content Model). Specified for periodic Sources only.'
+																)
+																.optional(),
+															caps: z
+																.record(z.any())
+																.describe('Capabilities (not yet defined)'),
+															device_id: idPrimitive
+																.describe(
+																	'Globally unique identifier for the Device which initially created the Source. This attribute is used to ensure referential integrity by registry implementations.'
+																),
+															parents: z
+																.array(
+																	z
+																		.string()
+																		.regex(
+																			new RegExp(
+																				'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
+																			)
+																		)
+																)
+																.describe(
+																	'Array of UUIDs representing the Source IDs of Grains which came together at the input to this Source (may change over the lifetime of this Source)'
+																),
+															clock_name: z
+																.union([
+																	z
+																		.string()
+																		.regex(new RegExp('^clk[0-9]+$'))
+																		.describe(
+																			'Reference to clock in the originating Node'
+																		),
+																	z
+																		.null()
+																		.describe(
+																			'Reference to clock in the originating Node'
+																		),
+																])
+																.describe('Reference to clock in the originating Node'),
+														})
+													)
+												)
+												.describe('Describes a Source'),
+											z.object({
+												format: z
+													.literal('urn:x-nmos:format:data')
+													.describe('Format of the data coming from the Source as a URN'),
+												event_type: z
+													.string()
+													.describe('Event type generated by this Source, if applicable')
+													.optional(),
+											})
+										)
+									)
+									.describe('Describes a data Source'),
 							]
 							const errors = schemas.reduce<z.ZodError[]>(
 								(errors, schema) =>
@@ -802,11 +946,18 @@ export default z
 															.describe('Interlaced video mode for frames in this Flow')
 															.default('progressive'),
 														colorspace: z
-															.enum(['BT601', 'BT709', 'BT2020', 'BT2100'])
-															.describe('Colorspace used for the video'),
+															.union([
+																z.enum(['BT601', 'BT709', 'BT2020', 'BT2100']),
+																z.any(),
+															])
+															.describe(
+																'Colorspace used for the video. Any values not defined in the enum should be defined in the NMOS Parameter Registers'
+															),
 														transfer_characteristic: z
-															.enum(['SDR', 'HLG', 'PQ'])
-															.describe('Transfer characteristic')
+															.union([z.enum(['SDR', 'HLG', 'PQ']), z.any()])
+															.describe(
+																'Transfer characteristic. Any values not defined in the enum should be defined in the NMOS Parameter Registers'
+															)
 															.default('SDR'),
 													})
 												)
@@ -1006,11 +1157,18 @@ export default z
 															.describe('Interlaced video mode for frames in this Flow')
 															.default('progressive'),
 														colorspace: z
-															.enum(['BT601', 'BT709', 'BT2020', 'BT2100'])
-															.describe('Colorspace used for the video'),
+															.union([
+																z.enum(['BT601', 'BT709', 'BT2020', 'BT2100']),
+																z.any(),
+															])
+															.describe(
+																'Colorspace used for the video. Any values not defined in the enum should be defined in the NMOS Parameter Registers'
+															),
 														transfer_characteristic: z
-															.enum(['SDR', 'HLG', 'PQ'])
-															.describe('Transfer characteristic')
+															.union([z.enum(['SDR', 'HLG', 'PQ']), z.any()])
+															.describe(
+																'Transfer characteristic. Any values not defined in the enum should be defined in the NMOS Parameter Registers'
+															)
 															.default('SDR'),
 													})
 												)
@@ -1360,13 +1518,7 @@ export default z
 												z.intersection(
 													z
 														.object({
-															id: z
-																.string()
-																.regex(
-																	new RegExp(
-																		'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-																	)
-																)
+															id: idPrimitive
 																.describe(
 																	'Globally unique identifier for the resource'
 																),
@@ -1422,23 +1574,11 @@ export default z
 																'Number of Grains per second for this Flow. Must be an integer division of, or equal to the Grain rate specified by the parent Source. Grain rate matches the frame rate for video (see NMOS Content Model). Specified for periodic Flows only.'
 															)
 															.optional(),
-														source_id: z
-															.string()
-															.regex(
-																new RegExp(
-																	'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-																)
-															)
+														source_id: idPrimitive
 															.describe(
 																'Globally unique identifier for the Source which initially created the Flow. This attribute is used to ensure referential integrity by registry implementations (v1.0 only).'
 															),
-														device_id: z
-															.string()
-															.regex(
-																new RegExp(
-																	'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-																)
-															)
+														device_id: idPrimitive
 															.describe(
 																'Globally unique identifier for the Device which initially created the Flow. This attribute is used to ensure referential integrity by registry implementations (v1.1 onwards).'
 															),
@@ -1466,7 +1606,9 @@ export default z
 											media_type: z
 												.any()
 												.refine(
-													(value) => !z.literal('video/smpte291').safeParse(value).success,
+													(value) =>
+														!z.enum(['video/smpte291', 'application/json']).safeParse(value)
+															.success,
 													'Invalid input: Should NOT be valid against schema'
 												)
 												.describe(
@@ -1486,13 +1628,7 @@ export default z
 												z.intersection(
 													z
 														.object({
-															id: z
-																.string()
-																.regex(
-																	new RegExp(
-																		'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-																	)
-																)
+															id: idPrimitive
 																.describe(
 																	'Globally unique identifier for the resource'
 																),
@@ -1548,23 +1684,11 @@ export default z
 																'Number of Grains per second for this Flow. Must be an integer division of, or equal to the Grain rate specified by the parent Source. Grain rate matches the frame rate for video (see NMOS Content Model). Specified for periodic Flows only.'
 															)
 															.optional(),
-														source_id: z
-															.string()
-															.regex(
-																new RegExp(
-																	'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-																)
-															)
+														source_id: idPrimitive
 															.describe(
 																'Globally unique identifier for the Source which initially created the Flow. This attribute is used to ensure referential integrity by registry implementations (v1.0 only).'
 															),
-														device_id: z
-															.string()
-															.regex(
-																new RegExp(
-																	'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-																)
-															)
+														device_id: idPrimitive
 															.describe(
 																'Globally unique identifier for the Device which initially created the Flow. This attribute is used to ensure referential integrity by registry implementations (v1.1 onwards).'
 															),
@@ -1627,13 +1751,7 @@ export default z
 												z.intersection(
 													z
 														.object({
-															id: z
-																.string()
-																.regex(
-																	new RegExp(
-																		'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-																	)
-																)
+															id: idPrimitive
 																.describe(
 																	'Globally unique identifier for the resource'
 																),
@@ -1689,23 +1807,119 @@ export default z
 																'Number of Grains per second for this Flow. Must be an integer division of, or equal to the Grain rate specified by the parent Source. Grain rate matches the frame rate for video (see NMOS Content Model). Specified for periodic Flows only.'
 															)
 															.optional(),
-														source_id: z
-															.string()
-															.regex(
-																new RegExp(
-																	'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-																)
-															)
+														source_id: idPrimitive
 															.describe(
 																'Globally unique identifier for the Source which initially created the Flow. This attribute is used to ensure referential integrity by registry implementations (v1.0 only).'
 															),
-														device_id: z
-															.string()
-															.regex(
-																new RegExp(
-																	'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-																)
+														device_id: idPrimitive
+															.describe(
+																'Globally unique identifier for the Device which initially created the Flow. This attribute is used to ensure referential integrity by registry implementations (v1.1 onwards).'
+															),
+														parents: z
+															.array(
+																z
+																	.string()
+																	.regex(
+																		new RegExp(
+																			'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
+																		)
+																	)
 															)
+															.describe(
+																'Array of UUIDs representing the Flow IDs of Grains which came together to generate this Flow (may change over the lifetime of this Flow)'
+															),
+													})
+												)
+											)
+											.describe('Describes a Flow'),
+										z.object({
+											format: z
+												.literal('urn:x-nmos:format:data')
+												.describe('Format of the data coming from the Flow as a URN'),
+											media_type: z
+												.literal('application/json')
+												.describe(
+													'Subclassification of the format using IANA assigned media types'
+												),
+											event_type: z
+												.string()
+												.describe('Event type generated by this Flow, if applicable')
+												.optional(),
+										})
+									)
+								)
+								.describe('Describes a JSON based Flow'),
+							z
+								.record(z.any())
+								.and(
+									z.intersection(
+										z
+											.record(z.any())
+											.and(
+												z.intersection(
+													z
+														.object({
+															id: idPrimitive
+																.describe(
+																	'Globally unique identifier for the resource'
+																),
+															version: z
+																.string()
+																.regex(new RegExp('^[0-9]+:[0-9]+$'))
+																.describe(
+																	'String formatted TAI timestamp (<seconds>:<nanoseconds>) indicating precisely when an attribute of the resource last changed'
+																),
+															label: z
+																.string()
+																.describe('Freeform string label for the resource'),
+															description: z
+																.string()
+																.describe('Detailed description of the resource'),
+															tags: z
+																.record(z.array(z.string()))
+																.superRefine((value, ctx) => {
+																	for (const key in value) {
+																		if (key.match(new RegExp(''))) {
+																			const result = z
+																				.array(z.string())
+																				.safeParse(value[key])
+																			if (!result.success) {
+																				ctx.addIssue({
+																					path: [...ctx.path, key],
+																					code: 'custom',
+																					message: `Invalid input: Key matching regex /${key}/ must match schema`,
+																					params: {
+																						issues: result.error.issues,
+																					},
+																				})
+																			}
+																		}
+																	}
+																})
+																.describe(
+																	'Key value set of freeform string tags to aid in filtering resources. Values should be represented as an array of strings. Can be empty.'
+																),
+														})
+														.describe('Describes the foundations of all NMOS resources'),
+													z.object({
+														grain_rate: z
+															.object({
+																numerator: z.number().int().describe('Numerator'),
+																denominator: z
+																	.number()
+																	.int()
+																	.describe('Denominator')
+																	.default(1),
+															})
+															.describe(
+																'Number of Grains per second for this Flow. Must be an integer division of, or equal to the Grain rate specified by the parent Source. Grain rate matches the frame rate for video (see NMOS Content Model). Specified for periodic Flows only.'
+															)
+															.optional(),
+														source_id: idPrimitive
+															.describe(
+																'Globally unique identifier for the Source which initially created the Flow. This attribute is used to ensure referential integrity by registry implementations (v1.0 only).'
+															),
+														device_id: idPrimitive
 															.describe(
 																'Globally unique identifier for the Device which initially created the Flow. This attribute is used to ensure referential integrity by registry implementations (v1.1 onwards).'
 															),
@@ -1792,31 +2006,26 @@ export default z
 								caps: z.object({}).describe('Capabilities of this sender').optional(),
 								flow_id: z
 									.union([
-										z
-											.string()
-											.regex(
-												new RegExp(
-													'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-												)
-											)
-											.describe('ID of the Flow currently passing via this Sender'),
+										idPrimitive
+											.describe(
+												'ID of the Flow currently passing via this Sender. Set to null when a Flow is not currently internally routed to the Sender.'
+											),
 										z
 											.null()
-											.describe('ID of the Flow currently passing via this Sender')
+											.describe(
+												'ID of the Flow currently passing via this Sender. Set to null when a Flow is not currently internally routed to the Sender.'
+											)
 											.default(null),
 									])
-									.describe('ID of the Flow currently passing via this Sender')
+									.describe(
+										'ID of the Flow currently passing via this Sender. Set to null when a Flow is not currently internally routed to the Sender.'
+									)
 									.default(null),
 								transport: z
 									.any()
 									.superRefine((x, ctx) => {
 										const schemas = [
-											z.enum([
-												'urn:x-nmos:transport:rtp',
-												'urn:x-nmos:transport:rtp.ucast',
-												'urn:x-nmos:transport:rtp.mcast',
-												'urn:x-nmos:transport:dash',
-											]),
+											z.any(),
 											z
 												.any()
 												.refine(
@@ -1841,61 +2050,56 @@ export default z
 										}
 									})
 									.describe('Transport type used by the Sender in URN format'),
-								device_id: z
-									.string()
-									.regex(
-										new RegExp(
-											'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-										)
-									)
+								device_id: idPrimitive
 									.describe(
 										'Device ID which this Sender forms part of. This attribute is used to ensure referential integrity by registry implementations.'
 									),
 								manifest_href: z
-									.string()
-									.url()
+									.union([
+										z
+											.string()
+											.url()
+											.describe(
+												'HTTP(S) accessible URL to a file describing how to connect to the Sender. Set to null when the transport type used by the Sender does not require a transport file.'
+											),
+										z
+											.null()
+											.describe(
+												'HTTP(S) accessible URL to a file describing how to connect to the Sender. Set to null when the transport type used by the Sender does not require a transport file.'
+											),
+									])
 									.describe(
-										"HTTP URL to a file describing how to connect to the Sender (SDP for RTP). The Sender's 'version' attribute should be updated if the contents of this file are modified. This URL may return an HTTP 404 where the 'active' parameter in the 'subscription' object is present and set to false (v1.2+ only)."
+										'HTTP(S) accessible URL to a file describing how to connect to the Sender. Set to null when the transport type used by the Sender does not require a transport file.'
 									),
 								interface_bindings: z
 									.array(z.string())
-									.describe(
-										"Binding of Sender egress ports to interfaces on the parent Node. Should contain a single network interface unless a redundancy mechanism such as ST.2022-7 is in use, in which case each 'leg' should have its matching interface listed. Where the redundancy mechanism sends more than one copy of the stream via the same interface, that interface should be listed a corresponding number of times."
-									),
+									.describe('Binding of Sender egress ports to interfaces on the parent Node.'),
 								subscription: z
 									.object({
 										receiver_id: z
 											.union([
-												z
-													.string()
-													.regex(
-														new RegExp(
-															'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-														)
-													)
+												idPrimitive
 													.describe(
-														'UUID of the Receiver that this Sender is currently subscribed to'
+														'UUID of the Receiver to which this Sender is currently configured to send data. Only set if it is active, uses a unicast push-based transport and is sending to an NMOS Receiver; otherwise null.'
 													),
 												z
 													.null()
 													.describe(
-														'UUID of the Receiver that this Sender is currently subscribed to'
+														'UUID of the Receiver to which this Sender is currently configured to send data. Only set if it is active, uses a unicast push-based transport and is sending to an NMOS Receiver; otherwise null.'
 													)
 													.default(null),
 											])
 											.describe(
-												'UUID of the Receiver that this Sender is currently subscribed to'
+												'UUID of the Receiver to which this Sender is currently configured to send data. Only set if it is active, uses a unicast push-based transport and is sending to an NMOS Receiver; otherwise null.'
 											)
 											.default(null),
 										active: z
 											.boolean()
-											.describe(
-												'Sender is enabled and configured to stream data to a single Receiver (unicast), or to the network via multicast or a pull-based mechanism'
-											)
+											.describe('Sender is enabled and configured to send data')
 											.default(false),
 									})
 									.describe(
-										"Object containing the 'receiver_id' currently subscribed to (unicast only). Receiver_id should be null on initialisation, or when connected to a non-NMOS unicast Receiver."
+										'Object indicating how this Sender is currently configured to send data.'
 									),
 							})
 						)
@@ -1967,13 +2171,7 @@ export default z
 																'Describes the foundations of all NMOS resources'
 															),
 														z.object({
-															device_id: z
-																.string()
-																.regex(
-																	new RegExp(
-																		'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-																	)
-																)
+															device_id: idPrimitive
 																.describe(
 																	'Device ID which this Receiver forms part of. This attribute is used to ensure referential integrity by registry implementations.'
 																),
@@ -1981,12 +2179,7 @@ export default z
 																.any()
 																.superRefine((x, ctx) => {
 																	const schemas = [
-																		z.enum([
-																			'urn:x-nmos:transport:rtp',
-																			'urn:x-nmos:transport:rtp.ucast',
-																			'urn:x-nmos:transport:rtp.mcast',
-																			'urn:x-nmos:transport:dash',
-																		]),
+																		z.any(),
 																		z
 																			.any()
 																			.refine(
@@ -2019,7 +2212,7 @@ export default z
 															interface_bindings: z
 																.array(z.string())
 																.describe(
-																	"Binding of Receiver ingress ports to interfaces on the parent Node. Should contain a single network interface unless a redundancy mechanism such as ST.2022-7 is in use, in which case each 'leg' should have its matching interface listed. Where the redundancy mechanism receives more than one copy of the stream via the same interface, that interface should be listed a corresponding number of times."
+																	'Binding of Receiver ingress ports to interfaces on the parent Node.'
 																),
 															subscription: z
 																.object({
@@ -2033,28 +2226,28 @@ export default z
 																					)
 																				)
 																				.describe(
-																					'UUID of the Sender that this Receiver is currently subscribed to'
+																					'UUID of the Sender from which this Receiver is currently configured to receive data. Only set if it is active and receiving from an NMOS Sender; otherwise null.'
 																				),
 																			z
 																				.null()
 																				.describe(
-																					'UUID of the Sender that this Receiver is currently subscribed to'
+																					'UUID of the Sender from which this Receiver is currently configured to receive data. Only set if it is active and receiving from an NMOS Sender; otherwise null.'
 																				)
 																				.default(null),
 																		])
 																		.describe(
-																			'UUID of the Sender that this Receiver is currently subscribed to'
+																			'UUID of the Sender from which this Receiver is currently configured to receive data. Only set if it is active and receiving from an NMOS Sender; otherwise null.'
 																		)
 																		.default(null),
 																	active: z
 																		.boolean()
 																		.describe(
-																			"Receiver is enabled and configured with a Sender's connection parameters"
+																			'Receiver is enabled and configured to receive data'
 																		)
 																		.default(false),
 																})
 																.describe(
-																	"Object containing the 'sender_id' currently subscribed to. Sender_id should be null on initialisation, or when connected to a non-NMOS Sender."
+																	'Object indicating how this Receiver is currently configured to receive data.'
 																),
 														})
 													)
@@ -2145,13 +2338,7 @@ export default z
 																'Describes the foundations of all NMOS resources'
 															),
 														z.object({
-															device_id: z
-																.string()
-																.regex(
-																	new RegExp(
-																		'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-																	)
-																)
+															device_id: idPrimitive
 																.describe(
 																	'Device ID which this Receiver forms part of. This attribute is used to ensure referential integrity by registry implementations.'
 																),
@@ -2159,12 +2346,7 @@ export default z
 																.any()
 																.superRefine((x, ctx) => {
 																	const schemas = [
-																		z.enum([
-																			'urn:x-nmos:transport:rtp',
-																			'urn:x-nmos:transport:rtp.ucast',
-																			'urn:x-nmos:transport:rtp.mcast',
-																			'urn:x-nmos:transport:dash',
-																		]),
+																		z.any(),
 																		z
 																			.any()
 																			.refine(
@@ -2197,7 +2379,7 @@ export default z
 															interface_bindings: z
 																.array(z.string())
 																.describe(
-																	"Binding of Receiver ingress ports to interfaces on the parent Node. Should contain a single network interface unless a redundancy mechanism such as ST.2022-7 is in use, in which case each 'leg' should have its matching interface listed. Where the redundancy mechanism receives more than one copy of the stream via the same interface, that interface should be listed a corresponding number of times."
+																	'Binding of Receiver ingress ports to interfaces on the parent Node.'
 																),
 															subscription: z
 																.object({
@@ -2211,28 +2393,28 @@ export default z
 																					)
 																				)
 																				.describe(
-																					'UUID of the Sender that this Receiver is currently subscribed to'
+																					'UUID of the Sender from which this Receiver is currently configured to receive data. Only set if it is active and receiving from an NMOS Sender; otherwise null.'
 																				),
 																			z
 																				.null()
 																				.describe(
-																					'UUID of the Sender that this Receiver is currently subscribed to'
+																					'UUID of the Sender from which this Receiver is currently configured to receive data. Only set if it is active and receiving from an NMOS Sender; otherwise null.'
 																				)
 																				.default(null),
 																		])
 																		.describe(
-																			'UUID of the Sender that this Receiver is currently subscribed to'
+																			'UUID of the Sender from which this Receiver is currently configured to receive data. Only set if it is active and receiving from an NMOS Sender; otherwise null.'
 																		)
 																		.default(null),
 																	active: z
 																		.boolean()
 																		.describe(
-																			"Receiver is enabled and configured with a Sender's connection parameters"
+																			'Receiver is enabled and configured to receive data'
 																		)
 																		.default(false),
 																})
 																.describe(
-																	"Object containing the 'sender_id' currently subscribed to. Sender_id should be null on initialisation, or when connected to a non-NMOS Sender."
+																	'Object indicating how this Receiver is currently configured to receive data.'
 																),
 														})
 													)
@@ -2328,13 +2510,7 @@ export default z
 																'Describes the foundations of all NMOS resources'
 															),
 														z.object({
-															device_id: z
-																.string()
-																.regex(
-																	new RegExp(
-																		'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-																	)
-																)
+															device_id: idPrimitive
 																.describe(
 																	'Device ID which this Receiver forms part of. This attribute is used to ensure referential integrity by registry implementations.'
 																),
@@ -2342,12 +2518,7 @@ export default z
 																.any()
 																.superRefine((x, ctx) => {
 																	const schemas = [
-																		z.enum([
-																			'urn:x-nmos:transport:rtp',
-																			'urn:x-nmos:transport:rtp.ucast',
-																			'urn:x-nmos:transport:rtp.mcast',
-																			'urn:x-nmos:transport:dash',
-																		]),
+																		z.any(),
 																		z
 																			.any()
 																			.refine(
@@ -2380,7 +2551,7 @@ export default z
 															interface_bindings: z
 																.array(z.string())
 																.describe(
-																	"Binding of Receiver ingress ports to interfaces on the parent Node. Should contain a single network interface unless a redundancy mechanism such as ST.2022-7 is in use, in which case each 'leg' should have its matching interface listed. Where the redundancy mechanism receives more than one copy of the stream via the same interface, that interface should be listed a corresponding number of times."
+																	'Binding of Receiver ingress ports to interfaces on the parent Node.'
 																),
 															subscription: z
 																.object({
@@ -2394,28 +2565,28 @@ export default z
 																					)
 																				)
 																				.describe(
-																					'UUID of the Sender that this Receiver is currently subscribed to'
+																					'UUID of the Sender from which this Receiver is currently configured to receive data. Only set if it is active and receiving from an NMOS Sender; otherwise null.'
 																				),
 																			z
 																				.null()
 																				.describe(
-																					'UUID of the Sender that this Receiver is currently subscribed to'
+																					'UUID of the Sender from which this Receiver is currently configured to receive data. Only set if it is active and receiving from an NMOS Sender; otherwise null.'
 																				)
 																				.default(null),
 																		])
 																		.describe(
-																			'UUID of the Sender that this Receiver is currently subscribed to'
+																			'UUID of the Sender from which this Receiver is currently configured to receive data. Only set if it is active and receiving from an NMOS Sender; otherwise null.'
 																		)
 																		.default(null),
 																	active: z
 																		.boolean()
 																		.describe(
-																			"Receiver is enabled and configured with a Sender's connection parameters"
+																			'Receiver is enabled and configured to receive data'
 																		)
 																		.default(false),
 																})
 																.describe(
-																	"Object containing the 'sender_id' currently subscribed to. Sender_id should be null on initialisation, or when connected to a non-NMOS Sender."
+																	'Object indicating how this Receiver is currently configured to receive data.'
 																),
 														})
 													)
@@ -2428,10 +2599,22 @@ export default z
 												caps: z
 													.object({
 														media_types: z
-															.array(z.union([z.literal('video/smpte291'), z.any()]))
+															.array(
+																z.union([
+																	z.enum(['video/smpte291', 'application/json']),
+																	z.any(),
+																])
+															)
 															.min(1)
 															.describe(
 																'Subclassification of the formats accepted using IANA assigned media types'
+															)
+															.optional(),
+														event_types: z
+															.array(z.string())
+															.min(1)
+															.describe(
+																'Subclassification of the event types accepted defined by the AMWA IS-07 specification'
 															)
 															.optional(),
 													})
@@ -2501,13 +2684,7 @@ export default z
 																'Describes the foundations of all NMOS resources'
 															),
 														z.object({
-															device_id: z
-																.string()
-																.regex(
-																	new RegExp(
-																		'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-																	)
-																)
+															device_id: idPrimitive
 																.describe(
 																	'Device ID which this Receiver forms part of. This attribute is used to ensure referential integrity by registry implementations.'
 																),
@@ -2515,12 +2692,7 @@ export default z
 																.any()
 																.superRefine((x, ctx) => {
 																	const schemas = [
-																		z.enum([
-																			'urn:x-nmos:transport:rtp',
-																			'urn:x-nmos:transport:rtp.ucast',
-																			'urn:x-nmos:transport:rtp.mcast',
-																			'urn:x-nmos:transport:dash',
-																		]),
+																		z.any(),
 																		z
 																			.any()
 																			.refine(
@@ -2553,7 +2725,7 @@ export default z
 															interface_bindings: z
 																.array(z.string())
 																.describe(
-																	"Binding of Receiver ingress ports to interfaces on the parent Node. Should contain a single network interface unless a redundancy mechanism such as ST.2022-7 is in use, in which case each 'leg' should have its matching interface listed. Where the redundancy mechanism receives more than one copy of the stream via the same interface, that interface should be listed a corresponding number of times."
+																	'Binding of Receiver ingress ports to interfaces on the parent Node.'
 																),
 															subscription: z
 																.object({
@@ -2567,28 +2739,28 @@ export default z
 																					)
 																				)
 																				.describe(
-																					'UUID of the Sender that this Receiver is currently subscribed to'
+																					'UUID of the Sender from which this Receiver is currently configured to receive data. Only set if it is active and receiving from an NMOS Sender; otherwise null.'
 																				),
 																			z
 																				.null()
 																				.describe(
-																					'UUID of the Sender that this Receiver is currently subscribed to'
+																					'UUID of the Sender from which this Receiver is currently configured to receive data. Only set if it is active and receiving from an NMOS Sender; otherwise null.'
 																				)
 																				.default(null),
 																		])
 																		.describe(
-																			'UUID of the Sender that this Receiver is currently subscribed to'
+																			'UUID of the Sender from which this Receiver is currently configured to receive data. Only set if it is active and receiving from an NMOS Sender; otherwise null.'
 																		)
 																		.default(null),
 																	active: z
 																		.boolean()
 																		.describe(
-																			"Receiver is enabled and configured with a Sender's connection parameters"
+																			'Receiver is enabled and configured to receive data'
 																		)
 																		.default(false),
 																})
 																.describe(
-																	"Object containing the 'sender_id' currently subscribed to. Sender_id should be null on initialisation, or when connected to a non-NMOS Sender."
+																	'Object indicating how this Receiver is currently configured to receive data.'
 																),
 														})
 													)

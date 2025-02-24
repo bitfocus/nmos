@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { idPrimitive, versionPrimitive } from './_primitives'
 
 export default z
 	.record(z.any())
@@ -10,17 +11,9 @@ export default z
 					z.intersection(
 						z
 							.object({
-								id: z
-									.string()
-									.regex(
-										new RegExp(
-											'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-										)
-									)
+								id: idPrimitive
 									.describe('Globally unique identifier for the resource'),
-								version: z
-									.string()
-									.regex(new RegExp('^[0-9]+:[0-9]+$'))
+								version: versionPrimitive
 									.describe(
 										'String formatted TAI timestamp (<seconds>:<nanoseconds>) indicating precisely when an attribute of the resource last changed'
 									),
@@ -60,23 +53,11 @@ export default z
 									'Number of Grains per second for this Flow. Must be an integer division of, or equal to the Grain rate specified by the parent Source. Grain rate matches the frame rate for video (see NMOS Content Model). Specified for periodic Flows only.'
 								)
 								.optional(),
-							source_id: z
-								.string()
-								.regex(
-									new RegExp(
-										'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-									)
-								)
+							source_id: idPrimitive
 								.describe(
 									'Globally unique identifier for the Source which initially created the Flow. This attribute is used to ensure referential integrity by registry implementations (v1.0 only).'
 								),
-							device_id: z
-								.string()
-								.regex(
-									new RegExp(
-										'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-									)
-								)
+							device_id: idPrimitive
 								.describe(
 									'Globally unique identifier for the Device which initially created the Flow. This attribute is used to ensure referential integrity by registry implementations (v1.1 onwards).'
 								),
@@ -107,10 +88,16 @@ export default z
 					.enum(['progressive', 'interlaced_tff', 'interlaced_bff', 'interlaced_psf'])
 					.describe('Interlaced video mode for frames in this Flow')
 					.default('progressive'),
-				colorspace: z.enum(['BT601', 'BT709', 'BT2020', 'BT2100']).describe('Colorspace used for the video'),
+				colorspace: z
+					.union([z.enum(['BT601', 'BT709', 'BT2020', 'BT2100']), z.any()])
+					.describe(
+						'Colorspace used for the video. Any values not defined in the enum should be defined in the NMOS Parameter Registers'
+					),
 				transfer_characteristic: z
-					.enum(['SDR', 'HLG', 'PQ'])
-					.describe('Transfer characteristic')
+					.union([z.enum(['SDR', 'HLG', 'PQ']), z.any()])
+					.describe(
+						'Transfer characteristic. Any values not defined in the enum should be defined in the NMOS Parameter Registers'
+					)
 					.default('SDR'),
 			})
 		)

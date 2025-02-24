@@ -6,7 +6,7 @@ export default z
 			.object({
 				id: idPrimitive
 					.describe('Globally unique identifier for the subscription'),
-				ws_href: z.string().url().describe('Address to connect to for the websocket subscription'),
+				ws_href: z.string().url().describe('Address to connect to for the WebSocket subscription'),
 				max_update_rate_ms: z
 					.number()
 					.int()
@@ -29,8 +29,11 @@ export default z
 					.describe(
 						'Object containing attributes to filter the resource on as per the Query Parameters specification. Can be empty.'
 					),
+				authorization: z
+					.boolean()
+					.describe('Whether the WebSocket connection requires authorization.')
+					.optional(),
 			})
 			.describe('A single subscription to a Query API')
 	)
-	.min(0)
 	.describe('A list of subscription resources')

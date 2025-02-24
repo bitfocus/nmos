@@ -1,12 +1,10 @@
 import { z } from 'zod'
+import { idPrimitive } from './_primitives'
 
 export default z
 	.object({
-		id: z
-			.string()
-			.regex(new RegExp('^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'))
-			.describe('Globally unique identifier for the subscription'),
-		ws_href: z.string().url().describe('Address to connect to for the websocket subscription'),
+		id: idPrimitive,
+		ws_href: z.string().url().describe('Address to connect to for the WebSocket subscription'),
 		max_update_rate_ms: z
 			.number()
 			.int()
@@ -27,5 +25,6 @@ export default z
 			.describe(
 				'Object containing attributes to filter the resource on as per the Query Parameters specification. Can be empty.'
 			),
+		authorization: z.boolean().describe('Whether the WebSocket connection requires authorization.').optional(),
 	})
 	.describe('A single subscription to a Query API')

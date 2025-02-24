@@ -1,12 +1,12 @@
 import { z } from 'zod'
-import { _nmosResourceBase } from '../../v1.3/zod/_nnosResourceBase'
-import { idPrimitive } from '../../v1.3/zod/_primitives'
+import { _nmosResourceBase } from './_nnosResourceBase'
+import { idPrimitive } from './_primitives'
 
 export default z
 	.record(z.any())
 	.and(
 		z.intersection(
-			_nmosResourceBase,	
+			_nmosResourceBase,
 			z.object({
 				grain_rate: z
 					.object({
@@ -24,11 +24,7 @@ export default z
 					),
 				parents: z
 					.array(
-						z
-							.string()
-							.regex(
-								new RegExp('^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$')
-							)
+						idPrimitive
 					)
 					.describe(
 						'Array of UUIDs representing the Source IDs of Grains which came together at the input to this Source (may change over the lifetime of this Source)'

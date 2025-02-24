@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { idPrimitive, versionPrimitive } from './_primitives'
 
 export default z
 	.record(z.any())
@@ -10,17 +11,9 @@ export default z
 					z.intersection(
 						z
 							.object({
-								id: z
-									.string()
-									.regex(
-										new RegExp(
-											'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-										)
-									)
+								id: idPrimitive
 									.describe('Globally unique identifier for the resource'),
-								version: z
-									.string()
-									.regex(new RegExp('^[0-9]+:[0-9]+$'))
+								version: versionPrimitive
 									.describe(
 										'String formatted TAI timestamp (<seconds>:<nanoseconds>) indicating precisely when an attribute of the resource last changed'
 									),
@@ -61,13 +54,7 @@ export default z
 								)
 								.optional(),
 							caps: z.record(z.any()).describe('Capabilities (not yet defined)'),
-							device_id: z
-								.string()
-								.regex(
-									new RegExp(
-										'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-									)
-								)
+							device_id: idPrimitive
 								.describe(
 									'Globally unique identifier for the Device which initially created the Source. This attribute is used to ensure referential integrity by registry implementations.'
 								),
@@ -106,32 +93,40 @@ export default z
 						z.object({
 							label: z.string().describe('Label for this channel'),
 							symbol: z
-								.enum([
-									'L',
-									'R',
-									'C',
-									'LFE',
-									'Ls',
-									'Rs',
-									'Lss',
-									'Rss',
-									'Lrs',
-									'Rrs',
-									'Lc',
-									'Rc',
-									'Cs',
-									'HI',
-									'VIN',
-									'M1',
-									'M2',
-									'Lt',
-									'Rt',
-									'Lst',
-									'Rst',
-									'S',
+								.union([
+									z.enum([
+										'L',
+										'R',
+										'C',
+										'LFE',
+										'Ls',
+										'Rs',
+										'Lss',
+										'Rss',
+										'Lrs',
+										'Rrs',
+										'Lc',
+										'Rc',
+										'Cs',
+										'HI',
+										'VIN',
+										'M1',
+										'M2',
+										'Lt',
+										'Rt',
+										'Lst',
+										'Rst',
+										'S',
+									]),
+									z
+										.string()
+										.regex(/^NSC(0[0-9][0-9]|1[0-1][0-9]|12[0-8])$/)
+										.describe('Numbered Source Channel'),
+									z
+										.string()
+										.regex(/^U(0[1-9]|[1-5][0-9]|6[0-4])$/)
+										.describe('Undefined channel'),
 								])
-								.or(z.string().regex(new RegExp('^NSC(0[0-9][0-9]|1[0-1][0-9]|12[0-8])$')))
-								.or(z.string().regex(new RegExp('^U(0[1-9]|[1-5][0-9]|6[0-4])$')))
 								.describe('Symbol for this channel (from VSF TR-03 Appendix A)')
 								.optional(),
 						})

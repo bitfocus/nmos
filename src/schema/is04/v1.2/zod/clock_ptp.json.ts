@@ -20,7 +20,7 @@ export default z
 		locked: z
 			.boolean()
 			.describe(
-				'Lock state of this clock to the external reference. If true, this device is slaved, otherwise it has no defined relationship to the external reference'
+				'Lock state of this clock to the external reference. If true, this device follows the external reference, otherwise it has no defined relationship to the external reference'
 			),
 	})
 	.describe('Describes a clock referenced to PTP')

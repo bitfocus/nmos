@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { idPrimitive, versionPrimitive } from './_primitives'
 
 export default z
 	.record(z.any())
@@ -10,17 +11,9 @@ export default z
 					z.intersection(
 						z
 							.object({
-								id: z
-									.string()
-									.regex(
-										new RegExp(
-											'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-										)
-									)
+								id: idPrimitive
 									.describe('Globally unique identifier for the resource'),
-								version: z
-									.string()
-									.regex(new RegExp('^[0-9]+:[0-9]+$'))
+								version: versionPrimitive
 									.describe(
 										'String formatted TAI timestamp (<seconds>:<nanoseconds>) indicating precisely when an attribute of the resource last changed'
 									),
@@ -61,13 +54,7 @@ export default z
 								)
 								.optional(),
 							caps: z.record(z.any()).describe('Capabilities (not yet defined)'),
-							device_id: z
-								.string()
-								.regex(
-									new RegExp(
-										'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-									)
-								)
+							device_id: idPrimitive
 								.describe(
 									'Globally unique identifier for the Device which initially created the Source. This attribute is used to ensure referential integrity by registry implementations.'
 								),
@@ -99,7 +86,7 @@ export default z
 				.describe('Describes a Source'),
 			z.object({
 				format: z
-					.enum(['urn:x-nmos:format:video', 'urn:x-nmos:format:data', 'urn:x-nmos:format:mux'])
+					.enum(['urn:x-nmos:format:video', 'urn:x-nmos:format:mux'])
 					.describe('Format of the data coming from the Source as a URN'),
 			})
 		)

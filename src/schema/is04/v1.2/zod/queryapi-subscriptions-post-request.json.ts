@@ -27,5 +27,11 @@ export default z
 			.describe(
 				'Object containing attributes to filter the resource on as per the Query Parameters specification. Can be empty.'
 			),
+		authorization: z
+			.boolean()
+			.describe(
+				"Whether the WebSocket connection requires authorization. NB: Default should be 'true' if the API requires authorization, and 'false' otherwise."
+			)
+			.optional(),
 	})
 	.describe('Create a new subscription to a Query API')

@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { idPrimitive, versionPrimitive } from './_primitives'
 
 export default z
 	.record(z.any())
@@ -10,17 +11,9 @@ export default z
 					z.intersection(
 						z
 							.object({
-								id: z
-									.string()
-									.regex(
-										new RegExp(
-											'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-										)
-									)
+								id: idPrimitive
 									.describe('Globally unique identifier for the resource'),
-								version: z
-									.string()
-									.regex(new RegExp('^[0-9]+:[0-9]+$'))
+								version: versionPrimitive
 									.describe(
 										'String formatted TAI timestamp (<seconds>:<nanoseconds>) indicating precisely when an attribute of the resource last changed'
 									),
@@ -51,13 +44,7 @@ export default z
 							})
 							.describe('Describes the foundations of all NMOS resources'),
 						z.object({
-							device_id: z
-								.string()
-								.regex(
-									new RegExp(
-										'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-									)
-								)
+							device_id: idPrimitive
 								.describe(
 									'Device ID which this Receiver forms part of. This attribute is used to ensure referential integrity by registry implementations.'
 								),
@@ -65,12 +52,7 @@ export default z
 								.any()
 								.superRefine((x, ctx) => {
 									const schemas = [
-										z.enum([
-											'urn:x-nmos:transport:rtp',
-											'urn:x-nmos:transport:rtp.ucast',
-											'urn:x-nmos:transport:rtp.mcast',
-											'urn:x-nmos:transport:dash',
-										]),
+										z.any(),
 										z
 											.any()
 											.refine(
@@ -97,41 +79,33 @@ export default z
 								.describe('Transport type accepted by the Receiver in URN format'),
 							interface_bindings: z
 								.array(z.string())
-								.describe(
-									"Binding of Receiver ingress ports to interfaces on the parent Node. Should contain a single network interface unless a redundancy mechanism such as ST.2022-7 is in use, in which case each 'leg' should have its matching interface listed. Where the redundancy mechanism receives more than one copy of the stream via the same interface, that interface should be listed a corresponding number of times."
-								),
+								.describe('Binding of Receiver ingress ports to interfaces on the parent Node.'),
 							subscription: z
 								.object({
 									sender_id: z
 										.union([
-											z
-												.string()
-												.regex(
-													new RegExp(
-														'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-													)
-												)
+											idPrimitive
 												.describe(
-													'UUID of the Sender that this Receiver is currently subscribed to'
+													'UUID of the Sender from which this Receiver is currently configured to receive data. Only set if it is active and receiving from an NMOS Sender; otherwise null.'
 												),
 											z
 												.null()
 												.describe(
-													'UUID of the Sender that this Receiver is currently subscribed to'
+													'UUID of the Sender from which this Receiver is currently configured to receive data. Only set if it is active and receiving from an NMOS Sender; otherwise null.'
 												)
 												.default(null),
 										])
-										.describe('UUID of the Sender that this Receiver is currently subscribed to')
+										.describe(
+											'UUID of the Sender from which this Receiver is currently configured to receive data. Only set if it is active and receiving from an NMOS Sender; otherwise null.'
+										)
 										.default(null),
 									active: z
 										.boolean()
-										.describe(
-											"Receiver is enabled and configured with a Sender's connection parameters"
-										)
+										.describe('Receiver is enabled and configured to receive data')
 										.default(false),
 								})
 								.describe(
-									"Object containing the 'sender_id' currently subscribed to. Sender_id should be null on initialisation, or when connected to a non-NMOS Sender."
+									'Object indicating how this Receiver is currently configured to receive data.'
 								),
 						})
 					)
