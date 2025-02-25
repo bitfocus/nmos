@@ -24,6 +24,12 @@ const _flowVideoFuture = z.object({
 		.describe('Array of objects describing the components'),
 })
 
+const _flowAudioFuture = z.object({
+	media_type: z.string().startsWith('audio/')
+})
+
+
+
 export default
 	_nmosResourceBase
 	.and(_flowBase)
@@ -49,7 +55,7 @@ export default
 				// audio
 				_flowAudioRaw,
 			]),
-			_flowVideoFuture,
+			z.any()
 		])
 	)
 	.describe('Describes a Flow')
