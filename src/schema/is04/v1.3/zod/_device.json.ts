@@ -2,18 +2,9 @@ import { z } from 'zod'
 import { _nmosResourceBase } from './_nnosResourceBase'
 import { idPrimitive } from './_primitives'
 import { URNControlSchema } from './_urns'
+import { _deviceControlsItemWithAuth } from './_controls'
 
-export const _deviceControlsItemWithAuth = z.object({
-	href: z
-		.string()
-		.url()
-		.describe('URL to reach a control endpoint, whether http or otherwise'),
-	type: URNControlSchema.describe('URN identifying the control format'),
-	authorization: z
-		.boolean()
-		.describe('This endpoint requires authorization')
-		.default(false),
-})
+
 
 export const _deviceControlsItemWithOptionalAuth =  z.object({
 	href: z

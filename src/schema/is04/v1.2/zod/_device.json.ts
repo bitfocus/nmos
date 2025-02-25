@@ -2,6 +2,8 @@ import { z } from 'zod'
 import { _nmosResourceBase } from './_nnosResourceBase'
 import { idPrimitive } from './_primitives'
 import { URNControlSchema } from './_urns'
+import { _deviceControlsItemWithAuth } from '../../v1.3/zod/_controls'
+import { _deviceControlsItem } from './_controls'
 
 export default _nmosResourceBase.and(
 	z.object({
@@ -23,13 +25,7 @@ export default _nmosResourceBase.and(
 			.describe('UUIDs of Receivers attached to the Device (deprecated)'),
 		controls: z
 			.array(
-				z.object({
-					href: z
-						.string()
-						.url()
-						.describe('URL to reach a control endpoint, whether http or otherwise'),
-					type: URNControlSchema.describe('URN identifying the control format'),
-				})
+				_deviceControlsItem
 			)
 			.describe('Control endpoints exposed for the Device'),
 		}))
