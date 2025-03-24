@@ -1,14 +1,12 @@
 import { z } from 'zod'
+import { _portPrimitive } from '../../../is04/v1.3/zod/_primitives'
 
 export default z
 	.array(
 		z.object({
-			id: z
-				.string()
-				.regex(new RegExp('^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'))
+			id: z.string()
 				.describe('ID of a device to be activated'),
-			code: z
-				.union([z.any(), z.any()])
+			code: z.number()
 				.describe('HTTP status code that would have resulted from an individual activation on this device'),
 			error: z
 				.string()
@@ -16,22 +14,12 @@ export default z
 					"Human readable message which is suitable for user interface display, and helpful to the user. Only included if 'code' indicates an error state"
 				)
 				.optional(),
-			debug: z
-				.union([
-					z
-						.null()
+			debug: z.
+				string().nullable()
 						.describe(
 							"Debug information which may assist a programmer working with the API. Only included if 'code' indicates an error state"
-						),
-					z
-						.string()
-						.describe(
-							"Debug information which may assist a programmer working with the API. Only included if 'code' indicates an error state"
-						),
-				])
-				.describe(
-					"Debug information which may assist a programmer working with the API. Only included if 'code' indicates an error state"
-				)
+						)
+				
 				.optional(),
 		})
 	)
