@@ -1,6 +1,6 @@
 //import activationResponse from './zod/activation-response-schema.json';
 //import activation from './zod/activation-schema.json';
-import bulkReceiverPost from './zod/bulk-receiver-post-schema.json';
+import bulkReceiverPost from './zod/bulk-receiver-post-schema';
 //import bulkResponse from './zod/bulk-response-schema.json';
 import bulkSenderPost from './zod/bulk-sender-post-schema.json';
 import connectionApiBase from './zod/connectionapi-base.json';
