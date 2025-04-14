@@ -157,6 +157,7 @@ export class NMOSNodeAPI extends NMOSNodeRuntime {
 		port = 80,
 		basePath = '/x-nmos',
 		strict = true,
+		insecureHTTPParser = true,
 	}: Partial<NMOSNodeRuntimeOptions>) {
 		super({
 			dialect,
@@ -165,6 +166,7 @@ export class NMOSNodeAPI extends NMOSNodeRuntime {
 			port,
 			basePath,
 			strict,
+			insecureHTTPParser,
 		})
 	}
 }

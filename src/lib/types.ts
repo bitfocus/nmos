@@ -7,6 +7,7 @@ export type NMOSNodeRuntimeOptions = {
 	basePath: string
 	dialect: NMOSDialect
 	strict: boolean
+	insecureHTTPParser: boolean
 }
 
 export type NMOSDeviceRuntimeOptions = {
