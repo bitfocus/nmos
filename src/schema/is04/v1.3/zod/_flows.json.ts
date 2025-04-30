@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { idPrimitive } from './_primitives'
-import _flow from './_flow.json'
+import _flow from './_flow'
 
 export default z
 	.array(

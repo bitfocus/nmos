@@ -1,14 +1,14 @@
-import node from './zod/_node.json'
-import devices from './zod/_devices.json'
-import device from './zod/_device.json'
+import node from './zod/_node'
+import devices from './zod/_devices'
+import device from './zod/_device'
 import senders from './zod/_senders.json'
 import sender from './zod/_sender.json'
-import receivers from './zod/_receivers.json'
+import receivers from './zod/_receivers'
 import receiver from './zod/_receiver.json'
 import sources from './zod/_sources.json'
 import source from './zod/_source.json'
 import flows from './zod/_flows.json'
-import flow from './zod/_flow.json'
+import flow from './zod/_flow'
 
 export default {
 	'/node/v1.3/self': node,
