@@ -1,9 +1,23 @@
 import { NMOSDeviceRuntimeOptions, NMOSNodeRuntimeOptions } from './types'
-import { Axios } from 'axios'
 import is04endpoints from '../schema/is04/index'
 import is05endpoints from '../schema/is05/index'
 import { z, ZodError } from 'zod'
-import _ from 'lodash'
+import _, { type get } from 'lodash'
+import superagent, { type SuperAgent, type SuperAgentStatic } from 'superagent'
+import nodeapiBaseV13 from '../schema/is04/v1.3/zod/nodeapi-base.json'
+import nodeapiBaseV12 from '../schema/is04/v1.2/zod/nodeapi-base.json'
+import nodeapiSelfV13 from '../schema/is04/v1.3/zod/_node'
+import nodeapiSelfV12 from '../schema/is04/v1.2/zod/_node'
+import nodeapiDevicesV13 from '../schema/is04/v1.3/zod/_devices'
+import nodeapiDevicesV12 from '../schema/is04/v1.2/zod/_devices'
+import nodeapiSourcesV13 from '../schema/is04/v1.3/zod/_sources'
+import nodeapiSourcesV12 from '../schema/is04/v1.2/zod/_sources'
+import nodeapiFlowsV13 from '../schema/is04/v1.3/zod/_flows'
+import nodeapiFlowsV12 from '../schema/is04/v1.2/zod/_flows'
+import nodeapiSendersV13 from '../schema/is04/v1.3/zod/_senders'
+import nodeapiSendersV12 from '../schema/is04/v1.2/zod/_senders'
+import nodeapiReceiversV13 from '../schema/is04/v1.3/zod/_receivers'
+import nodeapiReceiversV12 from '../schema/is04/v1.2/zod/_receivers'
 
 type IS04Endpoints = typeof is04endpoints
 export type IS04EndpointTypes = keyof typeof is04endpoints
@@ -14,140 +28,159 @@ export type IS05EndpointTypes = keyof typeof is05endpoints
 export type IS05EndpointType<T extends IS05EndpointTypes> = z.infer<IS05Endpoints[T]>
 
 export class NMOSNodeRuntime {
-	private runtime: Axios
 	private options: NMOSNodeRuntimeOptions
+
+	private protocol: 'http' | 'https'
+	private host: string
+	private port: number
+	private basePath: string
+	private is04Version: 'v1.0' | 'v1.1' | 'v1.2' | 'v1.3' | undefined
+	private timeout: number = 2000
+	private insecureHTTPParser: boolean = true
 
 	constructor(options: NMOSNodeRuntimeOptions) {
 		this.options = options
-		this.runtime = new Axios({
-			baseURL: `${options.protocol}://${options.host}:${options.port}${options.basePath}`,
-			timeout: 1000,
-			headers: {
-				'Content-Type': 'application/json',
-			},
-		})
+		this.protocol = options.protocol
+		this.host = options.host
+		this.port = options.port
+		this.basePath = options.basePath
+		this.timeout = options.timeout || 2000
+		this.insecureHTTPParser = options.insecureHTTPParser || true
 	}
 
-	async get<T extends IS04EndpointTypes>(path: T, options: Record<string, string> = {}): Promise<z.infer<typeof is04endpoints[T]>> {
-		const endpoint = is04endpoints[path]
-		const resolvedPath = path.replace(/{([^}]*)}/g, (_, key) => options[key])
-		const result = await this.runtime.get<IS04EndpointType<T>>(resolvedPath)
+	setIS04Version(version: 'v1.0' | 'v1.1' | 'v1.2' | 'v1.3') {
+		this.is04Version = version
+	}
 
-		if (result.status !== 200) {
-			throw new Error('Failed to fetch data from: ' + resolvedPath)
-		}
+	async probeNodeApiSupport(): Promise<('v1.0' | 'v1.1' | 'v1.2' | 'v1.3')[]> {
+		const response = await this.get(`${this.protocol}://${this.host}:${this.port}${this.basePath}/node`)
+		const firstParse = z
+			.array(z.string())
+			.parse(response.body)
+			.map((s) => s.replace(/\/$/, ''))
+	
+		return firstParse as ('v1.0' | 'v1.1' | 'v1.2' | 'v1.3')[]
+	}
 
-		if (typeof result.data === 'string') {
-			try {
-				result.data = JSON.parse(result.data)
-			} catch (error) {
-				console.error(error)
-				throw new Error('Failed to parse JSON')
-			}
-		}
-
-		if (this.options.strict) {
-			return await endpoint.parseAsync(result.data)
-		} else {
-			const parse = await endpoint.safeParseAsync(result.data)
-
-			if (!parse.success) {
-				parse.error.errors.forEach((error) => {
-					console.error('Validation error [' + path + ']', error.path.join('.') + ': ' + error.message, 'received', _.get(result.data, error.path.join('.')))
-				})
-			}
-
-			return parse.data as z.infer<typeof endpoint>
+	requireIS04Version() {
+		if (!this.is04Version) {
+			throw new Error('IS04 version not set')
 		}
 	}
+
+	get(url: string) {
+		return superagent.get(url).timeout(this.timeout).disableTLSCerts().accept('json')
+	}
+
+	async nodeSelfGet() {
+		this.requireIS04Version()
+		const httpRes = await this.get(`${this.protocol}://${this.host}:${this.port}${this.basePath}/node/${this.is04Version}/self`)
+		
+		if (this.is04Version === 'v1.3') {
+			const safe = nodeapiSelfV13.parse(httpRes.body)
+			return safe
+		}
+
+		if (this.is04Version === 'v1.2') {
+			const safe = nodeapiSelfV12.parse(httpRes.body)
+			// do polyfill here....
+			return safe
+		}
+
+		throw new Error('Unknown IS04 version')
+	}
+
+	async nodeDevicesGet() {
+		this.requireIS04Version()
+		const httpRes = await this.get(`${this.protocol}://${this.host}:${this.port}${this.basePath}/node/${this.is04Version}/devices`)
+		
+		if (this.is04Version === 'v1.3') {
+			const safe = nodeapiDevicesV13.parse(httpRes.body)
+			return safe
+		}
+
+		if (this.is04Version === 'v1.2') {
+			const safe = nodeapiDevicesV12.parse(httpRes.body)
+			return safe
+		}
+
+		throw new Error('Unknown IS04 version')
+	}
+
+
+	async nodeSourcesGet() {
+		this.requireIS04Version()
+		const httpRes = await this.get(`${this.protocol}://${this.host}:${this.port}${this.basePath}/node/${this.is04Version}/sources`)
+		
+		if (this.is04Version === 'v1.3') {
+			const safe = nodeapiSourcesV13.parse(httpRes.body)
+			return safe
+		}
+
+		if (this.is04Version === 'v1.2') {
+			const safe = nodeapiSourcesV12.parse(httpRes.body)
+			return safe
+		}
+
+		throw new Error('Unknown IS04 version')
+	}
+
+
+	async nodeFlowsGet() {
+		this.requireIS04Version()
+		const httpRes = await this.get(`${this.protocol}://${this.host}:${this.port}${this.basePath}/node/${this.is04Version}/flows`)
+		
+		if (this.is04Version === 'v1.3') {
+			const safe = nodeapiFlowsV13.parse(httpRes.body)
+			return safe
+		}
+
+		if (this.is04Version === 'v1.2') {
+			const safe = nodeapiFlowsV12.parse(httpRes.body)
+			return safe
+		}
+
+		throw new Error('Unknown IS04 version')
+	}
+
+	async nodeSendersGet() {
+		this.requireIS04Version()
+		const httpRes = await this.get(`${this.protocol}://${this.host}:${this.port}${this.basePath}/node/${this.is04Version}/senders`)
+		
+		if (this.is04Version === 'v1.3') {
+			const safe = nodeapiSendersV13.parse(httpRes.body)
+			return safe
+		}
+
+		if (this.is04Version === 'v1.2') {
+			const safe = nodeapiSendersV12.parse(httpRes.body)
+			return safe
+		}
+
+		throw new Error('Unknown IS04 version')
+	}
+
+	async nodeReceiversGet() {
+		this.requireIS04Version()
+		const httpRes = await this.get(`${this.protocol}://${this.host}:${this.port}${this.basePath}/node/${this.is04Version}/receivers`)
+
+		if (this.is04Version === 'v1.3') {
+			const safe = nodeapiReceiversV13.parse(httpRes.body)
+			return safe
+		}
+
+		if (this.is04Version === 'v1.2') {
+			const safe = nodeapiReceiversV12.parse(httpRes.body)
+			return safe
+		}
+
+		throw new Error('Unknown IS04 version')
+	}
+
+	
 }
 
-export class NMOSConnectionRuntime {
-	private runtime: Axios
-	private options: NMOSDeviceRuntimeOptions
 
-	constructor(options: NMOSDeviceRuntimeOptions) {
-		this.options = options
-		this.runtime = new Axios({
-			baseURL: `${options.baseUrl}`,
-			timeout: 1000,
-			headers: {
-				'Content-Type': 'application/json',
-			},
-		})
-	}
-
-	async execute<T extends IS05EndpointTypes>(method: 'patch' | 'get', path: T, options: Record<string, string> = {}) {
-		const endpoint = is05endpoints[path]
-		const resolvedPath = path.replace(/{([^}]*)}/g, (_, key) => options[key])
-
-		if (method !== 'get' && method !== 'patch') {
-			throw new Error('unknwon method ' + method)
-		}
-
-		const result = method === 'get' ? await this.runtime.get<IS05EndpointType<T>>(resolvedPath) : method === 'patch' ? await this.runtime.patch<IS05EndpointType<T>>(resolvedPath) : undefined
-
-		if (!result) {
-			throw new Error('Unknown error')
-		}
-
-		if (result.status !== 200) {
-			throw new Error('Failed to fetch data from: ' + resolvedPath)
-		}
-
-		try {
-			if (typeof result.data === 'string') {
-				try {
-					result.data = JSON.parse(result.data)
-				} catch (error) {
-					console.error(error)
-					throw new Error('Failed to parse JSON')
-				}
-			}
-
-			const parse = await endpoint.safeParseAsync(result.data)
-
-			if (!parse.success) {
-				parse.error.errors.forEach((error) => {
-					console.error('Validation error [' + path + ']', error.path.join('.') + ': ' + error.message, 'received', _.get(result.data, error.path.join('.')))
-				})
-
-				if (this.options.strict) {
-					console.error('Strict mode enabled, failed to parse data')
-					throw new ZodError(parse.error.issues)
-				}
-			}
-
-			return parse.data as z.infer<typeof endpoint>
-
-		} catch (error) {
-			console.error('error', error)
-		}
-	}
-
-	async get<T extends IS05EndpointTypes>(path: T, options: Record<string, string> = {}) {
-		this.execute('get', path, options)
-	}
-
-	async patch<T extends IS05EndpointTypes>(path: T, options: Record<string, string> = {}) {
-		this.execute('patch', path, options)
-	}
-}
-
-
-
-
-export class NMOSConnectionAPI extends NMOSConnectionRuntime {
-	constructor({
-		baseUrl = '',
-		strict = true,
-	}: Partial<NMOSDeviceRuntimeOptions>) {
-		super({
-			baseUrl,
-			strict,
-		})
-	}
-}
 
 export class NMOSNodeAPI extends NMOSNodeRuntime {
 	constructor({
@@ -158,6 +191,7 @@ export class NMOSNodeAPI extends NMOSNodeRuntime {
 		basePath = '/x-nmos',
 		strict = true,
 		insecureHTTPParser = true,
+		timeout = 2000,
 	}: Partial<NMOSNodeRuntimeOptions>) {
 		super({
 			dialect,
@@ -167,6 +201,7 @@ export class NMOSNodeAPI extends NMOSNodeRuntime {
 			basePath,
 			strict,
 			insecureHTTPParser,
+			timeout,
 		})
 	}
 }

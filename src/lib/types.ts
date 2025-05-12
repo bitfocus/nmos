@@ -8,6 +8,7 @@ export type NMOSNodeRuntimeOptions = {
 	dialect: NMOSDialect
 	strict: boolean
 	insecureHTTPParser: boolean
+	timeout?: number
 }
 
 export type NMOSDeviceRuntimeOptions = {

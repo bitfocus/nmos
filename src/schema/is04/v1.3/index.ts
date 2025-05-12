@@ -7,7 +7,7 @@ import receivers from './zod/_receivers'
 import receiver from './zod/_receiver'
 import sources from './zod/_sources'
 import source from './zod/_source'
-import flows from './zod/_flows.json'
+import flows from './zod/_flows'
 import flow from './zod/_flow'
 
 export default {
