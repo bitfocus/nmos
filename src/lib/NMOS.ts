@@ -53,7 +53,7 @@ export class NMOSNodeRuntime {
 	}
 
 	async probeNodeApiSupport(): Promise<('v1.0' | 'v1.1' | 'v1.2' | 'v1.3')[]> {
-		const response = await this.get(`${this.protocol}://${this.host}:${this.port}${this.basePath}/node`)
+		const response = await this.get(`${this.getBaseUrl()}/node`)
 		const firstParse = z
 			.array(z.string())
 			.parse(response.body)
@@ -68,13 +68,18 @@ export class NMOSNodeRuntime {
 		}
 	}
 
+	getBaseUrl() {
+		return `${this.protocol}://${this.host}:${this.port}${this.basePath}`
+	}
+
 	get(url: string) {
 		return superagent.get(url).timeout(this.timeout).disableTLSCerts().accept('json')
 	}
 
 	async nodeSelfGet() {
+		console.log('nodeSelfGet', this.is04Version)
 		this.requireIS04Version()
-		const httpRes = await this.get(`${this.protocol}://${this.host}:${this.port}${this.basePath}/node/${this.is04Version}/self`)
+		const httpRes = await this.get(`${this.getBaseUrl()}/node/${this.is04Version}/self`)
 		
 		if (this.is04Version === 'v1.3') {
 			const safe = nodeapiSelfV13.parse(httpRes.body)
@@ -91,8 +96,9 @@ export class NMOSNodeRuntime {
 	}
 
 	async nodeDevicesGet() {
+		console.log('nodeDevicesGet', this.is04Version)
 		this.requireIS04Version()
-		const httpRes = await this.get(`${this.protocol}://${this.host}:${this.port}${this.basePath}/node/${this.is04Version}/devices`)
+		const httpRes = await this.get(`${this.getBaseUrl()}/node/${this.is04Version}/devices`)
 		
 		if (this.is04Version === 'v1.3') {
 			const safe = nodeapiDevicesV13.parse(httpRes.body)
@@ -109,8 +115,9 @@ export class NMOSNodeRuntime {
 
 
 	async nodeSourcesGet() {
+		console.log('nodeSourcesGet', this.is04Version)
 		this.requireIS04Version()
-		const httpRes = await this.get(`${this.protocol}://${this.host}:${this.port}${this.basePath}/node/${this.is04Version}/sources`)
+		const httpRes = await this.get(`${this.getBaseUrl()}/node/${this.is04Version}/sources`)
 		
 		if (this.is04Version === 'v1.3') {
 			const safe = nodeapiSourcesV13.parse(httpRes.body)
@@ -127,8 +134,9 @@ export class NMOSNodeRuntime {
 
 
 	async nodeFlowsGet() {
+		console.log('nodeFlowsGet', this.is04Version)
 		this.requireIS04Version()
-		const httpRes = await this.get(`${this.protocol}://${this.host}:${this.port}${this.basePath}/node/${this.is04Version}/flows`)
+		const httpRes = await this.get(`${this.getBaseUrl()}/node/${this.is04Version}/flows`)
 		
 		if (this.is04Version === 'v1.3') {
 			const safe = nodeapiFlowsV13.parse(httpRes.body)
@@ -144,8 +152,9 @@ export class NMOSNodeRuntime {
 	}
 
 	async nodeSendersGet() {
+		console.log('nodeSendersGet', this.is04Version)
 		this.requireIS04Version()
-		const httpRes = await this.get(`${this.protocol}://${this.host}:${this.port}${this.basePath}/node/${this.is04Version}/senders`)
+		const httpRes = await this.get(`${this.getBaseUrl()}/node/${this.is04Version}/senders`)
 		
 		if (this.is04Version === 'v1.3') {
 			const safe = nodeapiSendersV13.parse(httpRes.body)
@@ -161,8 +170,9 @@ export class NMOSNodeRuntime {
 	}
 
 	async nodeReceiversGet() {
+		console.log('nodeReceiversGet', this.is04Version)
 		this.requireIS04Version()
-		const httpRes = await this.get(`${this.protocol}://${this.host}:${this.port}${this.basePath}/node/${this.is04Version}/receivers`)
+		const httpRes = await this.get(`${this.getBaseUrl()}/node/${this.is04Version}/receivers`)
 
 		if (this.is04Version === 'v1.3') {
 			const safe = nodeapiReceiversV13.parse(httpRes.body)
