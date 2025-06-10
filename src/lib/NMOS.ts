@@ -1,7 +1,7 @@
 import { NMOSDeviceRuntimeOptions, NMOSNodeRuntimeOptions } from './types'
 import is04endpoints from '../schema/is04/index'
 import is05endpoints from '../schema/is05/index'
-import { z, ZodError } from 'zod'
+import { z, ZodError, type ZodIssue } from 'zod'
 import _, { type get } from 'lodash'
 import superagent, { type SuperAgent, type SuperAgentStatic } from 'superagent'
 import nodeapiBaseV13 from '../schema/is04/v1.3/zod/nodeapi-base.json'
@@ -18,6 +18,9 @@ import nodeapiSendersV13 from '../schema/is04/v1.3/zod/_senders'
 import nodeapiSendersV12 from '../schema/is04/v1.2/zod/_senders'
 import nodeapiReceiversV13 from '../schema/is04/v1.3/zod/_receivers'
 import nodeapiReceiversV12 from '../schema/is04/v1.2/zod/_receivers'
+import { safeSuperagent, type SUPERAGENT_ERROR } from './neverthrow_superagent'
+import type { ZOD_WRAPPED_ERROR } from './neverthrow_zod'
+import type { NeverthrowResult } from './neverthrow'
 
 type IS04Endpoints = typeof is04endpoints
 export type IS04EndpointTypes = keyof typeof is04endpoints
@@ -26,6 +29,7 @@ export type IS04EndpointType<T extends IS04EndpointTypes> = z.infer<IS04Endpoint
 type IS05Endpoints = typeof is05endpoints
 export type IS05EndpointTypes = keyof typeof is05endpoints
 export type IS05EndpointType<T extends IS05EndpointTypes> = z.infer<IS05Endpoints[T]>
+
 
 export class NMOSNodeRuntime {
 	private options: NMOSNodeRuntimeOptions
@@ -52,14 +56,22 @@ export class NMOSNodeRuntime {
 		this.is04Version = version
 	}
 
-	async probeNodeApiSupport(): Promise<('v1.0' | 'v1.1' | 'v1.2' | 'v1.3')[]> {
-		const response = await this.get(`${this.getBaseUrl()}/node`)
+	async probeNodeApiSupport(): Promise<NeverthrowResult<('v1.0' | 'v1.1' | 'v1.2' | 'v1.3')[]>> {
+		const response = await safeSuperagent(() => this.get(`${this.getBaseUrl()}/node`))
+		
+		if (response.error) {
+			return { ok: null, error: response.error }
+		}
+
 		const firstParse = z
 			.array(z.string())
-			.parse(response.body)
-			.map((s) => s.replace(/\/$/, ''))
-	
-		return firstParse as ('v1.0' | 'v1.1' | 'v1.2' | 'v1.3')[]
+			.safeParse(response.ok.body)
+
+		if (!firstParse.success) {
+			return { ok: null, error: { code: 'ZOD_ERROR', message: firstParse.error.message, issues: firstParse.error.issues } }
+		}
+
+		return { ok: firstParse.data.map((s) => s.replace(/\/$/, '')) as ('v1.0' | 'v1.1' | 'v1.2' | 'v1.3')[], error: null }
 	}
 
 	requireIS04Version() {
@@ -76,112 +88,194 @@ export class NMOSNodeRuntime {
 		return superagent.get(url).timeout(this.timeout).disableTLSCerts().accept('json')
 	}
 
-	async nodeSelfGet() {
+	async nodeSelfGet(): Promise<NeverthrowResult<z.infer<typeof nodeapiSelfV13> | z.infer<typeof nodeapiSelfV12>>> {
 		console.log('nodeSelfGet', this.is04Version)
 		this.requireIS04Version()
-		const httpRes = await this.get(`${this.getBaseUrl()}/node/${this.is04Version}/self`)
+		const httpRes = await safeSuperagent(() => this.get(`${this.getBaseUrl()}/node/${this.is04Version}/self`))
 		
+		if (httpRes.error) {
+			return { ok: null, error: httpRes.error }
+		}
+
 		if (this.is04Version === 'v1.3') {
-			const safe = nodeapiSelfV13.parse(httpRes.body)
-			return safe
+			const safe = nodeapiSelfV13.safeParse(httpRes.ok.body)
+			if (safe.error) {
+				return { ok: null, error: { code: 'ZOD_ERROR', message: safe.error.message, issues: safe.error.issues } }
+			}
+
+			return { ok: safe.data, error: null }
 		}
 
 		if (this.is04Version === 'v1.2') {
-			const safe = nodeapiSelfV12.parse(httpRes.body)
+			const safe = nodeapiSelfV12.safeParse(httpRes.ok.body)
 			// do polyfill here....
-			return safe
+			if (safe.error) {
+				return { ok: null, error: { code: 'ZOD_ERROR', message: safe.error.message, issues: safe.error.issues } }
+			}
+
+			return { ok: safe.data, error: null }
 		}
 
 		throw new Error('Unknown IS04 version')
 	}
 
-	async nodeDevicesGet() {
+	async nodeDevicesGet(): Promise<NeverthrowResult<z.infer<typeof nodeapiDevicesV13> | z.infer<typeof nodeapiDevicesV12>>> {
 		console.log('nodeDevicesGet', this.is04Version)
 		this.requireIS04Version()
-		const httpRes = await this.get(`${this.getBaseUrl()}/node/${this.is04Version}/devices`)
+		const httpRes = await safeSuperagent(() => this.get(`${this.getBaseUrl()}/node/${this.is04Version}/devices`))
 		
+		if (httpRes.error) {
+			return { ok: null, error: httpRes.error }
+		}
+
 		if (this.is04Version === 'v1.3') {
-			const safe = nodeapiDevicesV13.parse(httpRes.body)
-			return safe
+			const safe = nodeapiDevicesV13.safeParse(httpRes.ok.body)
+			
+			if (safe.error) {
+				return { ok: null, error: { code: 'ZOD_ERROR', message: safe.error.message, issues: safe.error.issues } }
+			}
+
+			return { ok: safe.data, error: null }
 		}
 
 		if (this.is04Version === 'v1.2') {
-			const safe = nodeapiDevicesV12.parse(httpRes.body)
-			return safe
+			const safe = nodeapiDevicesV12.safeParse(httpRes.ok.body)
+
+			if (safe.error) {
+				return { ok: null, error: { code: 'ZOD_ERROR', message: safe.error.message, issues: safe.error.issues } }
+			}
+
+			return { ok: safe.data, error: null }
 		}
 
 		throw new Error('Unknown IS04 version')
 	}
 
 
-	async nodeSourcesGet() {
+	async nodeSourcesGet(): Promise<NeverthrowResult<z.infer<typeof nodeapiSourcesV13> | z.infer<typeof nodeapiSourcesV12>>> {
 		console.log('nodeSourcesGet', this.is04Version)
 		this.requireIS04Version()
-		const httpRes = await this.get(`${this.getBaseUrl()}/node/${this.is04Version}/sources`)
+		const httpRes = await safeSuperagent(() => this.get(`${this.getBaseUrl()}/node/${this.is04Version}/sources`))
 		
+		if (httpRes.error) {
+			return { ok: null, error: httpRes.error }
+		}
+
 		if (this.is04Version === 'v1.3') {
-			const safe = nodeapiSourcesV13.parse(httpRes.body)
-			return safe
+			const safe = nodeapiSourcesV13.safeParse(httpRes.ok.body)
+
+			if (safe.error) {
+				return { ok: null, error: { code: 'ZOD_ERROR', message: safe.error.message, issues: safe.error.issues } }
+			}
+
+			return { ok: safe.data, error: null }
 		}
 
 		if (this.is04Version === 'v1.2') {
-			const safe = nodeapiSourcesV12.parse(httpRes.body)
-			return safe
+			const safe = nodeapiSourcesV12.safeParse(httpRes.ok.body)
+
+			if (safe.error) {
+				return { ok: null, error: { code: 'ZOD_ERROR', message: safe.error.message, issues: safe.error.issues } }
+			}
+
+			return { ok: safe.data, error: null }
 		}
 
 		throw new Error('Unknown IS04 version')
 	}
 
 
-	async nodeFlowsGet() {
+	async nodeFlowsGet(): Promise<NeverthrowResult<z.infer<typeof nodeapiFlowsV13> | z.infer<typeof nodeapiFlowsV12>>> {
 		console.log('nodeFlowsGet', this.is04Version)
 		this.requireIS04Version()
-		const httpRes = await this.get(`${this.getBaseUrl()}/node/${this.is04Version}/flows`)
+		const httpRes = await safeSuperagent(() => this.get(`${this.getBaseUrl()}/node/${this.is04Version}/flows`))
 		
+		if (httpRes.error) {
+			return { ok: null, error: httpRes.error }
+		}
+
 		if (this.is04Version === 'v1.3') {
-			const safe = nodeapiFlowsV13.parse(httpRes.body)
-			return safe
+			const safe = nodeapiFlowsV13.safeParse(httpRes.ok.body)
+
+			if (safe.error) {
+				return { ok: null, error: { code: 'ZOD_ERROR', message: safe.error.message, issues: safe.error.issues } }
+			}
+
+			return { ok: safe.data, error: null }
 		}
 
 		if (this.is04Version === 'v1.2') {
-			const safe = nodeapiFlowsV12.parse(httpRes.body)
-			return safe
+			const safe = nodeapiFlowsV12.safeParse(httpRes.ok.body)
+
+			if (safe.error) {
+				return { ok: null, error: { code: 'ZOD_ERROR', message: safe.error.message, issues: safe.error.issues } }
+			}
+
+			return { ok: safe.data, error: null }
 		}
 
 		throw new Error('Unknown IS04 version')
 	}
 
-	async nodeSendersGet() {
+	async nodeSendersGet(): Promise<NeverthrowResult<z.infer<typeof nodeapiSendersV13> | z.infer<typeof nodeapiSendersV12>>> {
 		console.log('nodeSendersGet', this.is04Version)
 		this.requireIS04Version()
-		const httpRes = await this.get(`${this.getBaseUrl()}/node/${this.is04Version}/senders`)
-		
+		const httpRes = await safeSuperagent(() => this.get(`${this.getBaseUrl()}/node/${this.is04Version}/senders`))
+
+		if (httpRes.error) {
+			return { ok: null, error: httpRes.error }
+		}
+
 		if (this.is04Version === 'v1.3') {
-			const safe = nodeapiSendersV13.parse(httpRes.body)
-			return safe
+			const safe = nodeapiSendersV13.safeParse(httpRes.ok.body)
+
+			if (safe.error) {
+				return { ok: null, error: { code: 'ZOD_ERROR', message: safe.error.message, issues: safe.error.issues } }
+			}
+
+			return { ok: safe.data, error: null }
 		}
 
 		if (this.is04Version === 'v1.2') {
-			const safe = nodeapiSendersV12.parse(httpRes.body)
-			return safe
+			const safe = nodeapiSendersV12.safeParse(httpRes.ok.body)
+
+			if (safe.error) {
+				return { ok: null, error: { code: 'ZOD_ERROR', message: safe.error.message, issues: safe.error.issues } }
+			}
+
+			return { ok: safe.data, error: null }
 		}
 
 		throw new Error('Unknown IS04 version')
 	}
 
-	async nodeReceiversGet() {
+	async nodeReceiversGet(): Promise<NeverthrowResult<z.infer<typeof nodeapiReceiversV13> | z.infer<typeof nodeapiReceiversV12>>> {
 		console.log('nodeReceiversGet', this.is04Version)
 		this.requireIS04Version()
-		const httpRes = await this.get(`${this.getBaseUrl()}/node/${this.is04Version}/receivers`)
+		const httpRes = await safeSuperagent(() => this.get(`${this.getBaseUrl()}/node/${this.is04Version}/receivers`))
+
+		if (httpRes.error) {
+			return { ok: null, error: httpRes.error }
+		}
 
 		if (this.is04Version === 'v1.3') {
-			const safe = nodeapiReceiversV13.parse(httpRes.body)
-			return safe
+			const safe = nodeapiReceiversV13.safeParse(httpRes.ok.body)
+
+			if (safe.error) {
+				return { ok: null, error: { code: 'ZOD_ERROR', message: safe.error.message, issues: safe.error.issues } }
+			}
+
+			return { ok: safe.data, error: null }
 		}
 
 		if (this.is04Version === 'v1.2') {
-			const safe = nodeapiReceiversV12.parse(httpRes.body)
-			return safe
+			const safe = nodeapiReceiversV12.safeParse(httpRes.ok.body)
+
+			if (safe.error) {
+				return { ok: null, error: { code: 'ZOD_ERROR', message: safe.error.message, issues: safe.error.issues } }
+			}
+
+			return { ok: safe.data, error: null }
 		}
 
 		throw new Error('Unknown IS04 version')
@@ -215,3 +309,5 @@ export class NMOSNodeAPI extends NMOSNodeRuntime {
 		})
 	}
 }
+
+
