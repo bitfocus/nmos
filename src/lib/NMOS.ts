@@ -20,7 +20,7 @@ import nodeapiReceiversV13 from '../schema/is04/v1.3/zod/_receivers'
 import nodeapiReceiversV12 from '../schema/is04/v1.2/zod/_receivers'
 import { safeSuperagent, type SUPERAGENT_ERROR } from './neverthrow_superagent'
 import type { ZOD_WRAPPED_ERROR } from './neverthrow_zod'
-import type { NeverthrowResult } from './neverthrow'
+import type { NeverthrowError, NeverthrowResult } from './neverthrow'
 
 type IS04Endpoints = typeof is04endpoints
 export type IS04EndpointTypes = keyof typeof is04endpoints
@@ -30,6 +30,14 @@ type IS05Endpoints = typeof is05endpoints
 export type IS05EndpointTypes = keyof typeof is05endpoints
 export type IS05EndpointType<T extends IS05EndpointTypes> = z.infer<IS05Endpoints[T]>
 
+
+export type NmosResult<T> = {
+	ok: T
+	error: null
+} | {
+	ok: null
+	error: NeverthrowError
+}
 
 export class NMOSNodeRuntime {
 	private options: NMOSNodeRuntimeOptions
@@ -56,7 +64,7 @@ export class NMOSNodeRuntime {
 		this.is04Version = version
 	}
 
-	async probeNodeApiSupport(): Promise<NeverthrowResult<('v1.0' | 'v1.1' | 'v1.2' | 'v1.3')[]>> {
+	async probeNodeApiSupport(): Promise<NmosResult<('v1.0' | 'v1.1' | 'v1.2' | 'v1.3')[]>> {
 		const response = await safeSuperagent(() => this.get(`${this.getBaseUrl()}/node`))
 		
 		if (response.error) {
