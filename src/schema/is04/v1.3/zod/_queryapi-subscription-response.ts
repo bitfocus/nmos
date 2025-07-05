@@ -9,7 +9,7 @@ export default z
 			.number()
 			.int()
 			.describe(
-				'Rate limiting for messages. Sets the minimum interval (in milliseconds) between consecutive WebSocket messages.'
+				'Rate limiting for messages. Sets the minimum interval (in milliseconds) between consecutive WebSocket messages.',
 			)
 			.default(100),
 		persist: z
@@ -23,7 +23,7 @@ export default z
 		params: z
 			.record(z.any())
 			.describe(
-				'Object containing attributes to filter the resource on as per the Query Parameters specification. Can be empty.'
+				'Object containing attributes to filter the resource on as per the Query Parameters specification. Can be empty.',
 			),
 		authorization: z.boolean().describe('Whether the WebSocket connection requires authorization.').optional(),
 	})
