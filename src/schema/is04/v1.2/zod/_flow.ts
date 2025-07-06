@@ -12,28 +12,25 @@ import { _flowDataSDIAncillaryCore } from './_flowDataSDIAncilleryCore'
 import { _flowDataGenericCore } from './_flowDataGenericCore'
 import { _flowAudioCoded } from './_flowAudioCoded'
 import { _flowDataCore } from './_flowDataCore'
+import { looseFlow } from './../../v1.3/zod/_flow'
 
-
-export default
-	_nmosResourceBase
+export default _nmosResourceBase
 	.and(_flowBase)
-	.and(z.discriminatedUnion('format', [
-		_flowVideoCore,
-		_flowAudioCore,
-		_flowDataCore,
-		_flowMuxCore,
-	]))
-	.and(z.discriminatedUnion('media_type', [
-		// data
-		_flowDataJSONCore,
-		_flowDataSDIAncillaryCore,
+	.and(z.discriminatedUnion('format', [_flowVideoCore, _flowAudioCore, _flowDataCore, _flowMuxCore]))
+	.and(
+		z.discriminatedUnion('media_type', [
+			// data
+			_flowDataJSONCore,
+			_flowDataSDIAncillaryCore,
 
-		// video
-		_flowVideoCodedH264,
-		_flowVideoCodedVC2,
-		_flowVideoRaw,
+			// video
+			_flowVideoCodedH264,
+			_flowVideoCodedVC2,
+			_flowVideoRaw,
 
-		// audio
-		_flowAudioRaw,
-	]))
-		.describe('Describes a Flow')
+			// audio
+			_flowAudioRaw,
+		]),
+	)
+	.and(looseFlow)
+	.describe('Describes a Flow')

@@ -1,2 +1,2 @@
-import { NMOSNodeAPI } from './lib/NMOS'
-export default NMOSNodeAPI
+import { NMOSNodeApi } from './lib/NMOS'
+export default NMOSNodeApi

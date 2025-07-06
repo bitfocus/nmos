@@ -1,6 +1,6 @@
 export type NMOSDialect = null | 'test'
 
-export type NMOSNodeRuntimeOptions = {
+export type NMOSNodeLinkOptions = {
 	protocol: 'http' | 'https'
 	host: string
 	port: number
@@ -9,6 +9,7 @@ export type NMOSNodeRuntimeOptions = {
 	strict: boolean
 	insecureHTTPParser: boolean
 	timeout?: number
+	is04Version?: 'v1.2' | 'v1.3' | 'auto' | string
 }
 
 export type NMOSDeviceRuntimeOptions = {
