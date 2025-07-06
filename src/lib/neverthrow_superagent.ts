@@ -1,4 +1,3 @@
-
 import superagent from 'superagent'
 
 export const safeSuperagent = async (fn: () => Promise<superagent.Response>): Promise<SUPERAGENT_RESPONSE> => {
@@ -13,7 +12,7 @@ export const safeSuperagent = async (fn: () => Promise<superagent.Response>): Pr
 			if (e.message.includes('500')) {
 				return { ok: null, error: { code: 'SUPERAGENT_500', message: e.message } }
 			}
-			if (e.message.includes('timeout')) {
+			if (e.message.includes('Timeout')) {
 				return { ok: null, error: { code: 'SUPERAGENT_TIMEOUT', message: e.message } }
 			}
 			if (e.message.includes('ECONNREFUSED')) {
@@ -51,6 +50,5 @@ export type SUPERAGENT_ERROR = {
 	code: SUPERAGENT_ERROR_CODE
 	message: string
 }
-
 
 export type SUPERAGENT_RESPONSE = { ok: superagent.Response; error: null } | { ok: null; error: SUPERAGENT_ERROR }
