@@ -50,7 +50,7 @@ export class NMOSNodeApi {
 	private basePath: string
 	private requestedIS04Version: SupportedVersion | 'auto' | undefined
 	private verifiedIS04Version: SupportedVersion | undefined
-	private timeout = 2000
+	private timeout: number
 	private insecureHTTPParser: boolean
 
 	constructor(options: NMOSNodeLinkOptions) {
@@ -59,7 +59,7 @@ export class NMOSNodeApi {
 		this.port = options.port
 		this.requestedIS04Version = options.is04Version
 		this.basePath = options.basePath
-		this.timeout = options.timeout || 2000
+		this.timeout = options.timeout || 10000
 		this.insecureHTTPParser = options.insecureHTTPParser || true
 	}
 

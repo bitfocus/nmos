@@ -1,36 +1,43 @@
 import { z } from 'zod'
 import { _nmosResourceBase } from './_nnosResourceBase'
 import { _flowBase } from './_flowBase'
-import { _flowVideoCore } from './_flowVideoCore'
-import { _flowAudioCore } from './_flowAudioCore'
-import { _flowVideoRaw } from './_flowVideoRaw'
-import { _flowVideoCodedH264, _flowVideoCodedVC2 } from './_flowVideoCoded'
-import { _flowAudioRaw } from './_flowAudioRaw'
-import { _flowMuxCore } from './_flowMuxCore'
-import { _flowDataJSONCore } from './_flowDataJSONCore'
-import { _flowDataSDIAncillaryCore } from './_flowDataSDIAncilleryCore'
-import { _flowDataGenericCore } from './_flowDataGenericCore'
-import { _flowAudioCoded } from './_flowAudioCoded'
-import { _flowDataCore } from './_flowDataCore'
-import { looseFlow } from './../../v1.3/zod/_flow'
+
+export const looseFlow = z.object({
+	sample_rate: z.object({}).passthrough().default({}),
+	components: z.array(z.unknown()).default([]),
+	frame_width: z.number().default(0).optional(),
+	frame_height: z.number().default(0).optional(),
+	interlace_mode: z.string().optional(),
+	colorspace: z.string().optional(),
+	transfer_characteristic: z.string().optional(),
+})
 
 export default _nmosResourceBase
 	.and(_flowBase)
-	.and(z.discriminatedUnion('format', [_flowVideoCore, _flowAudioCore, _flowDataCore, _flowMuxCore]))
 	.and(
-		z.discriminatedUnion('media_type', [
-			// data
-			_flowDataJSONCore,
-			_flowDataSDIAncillaryCore,
-
-			// video
-			_flowVideoCodedH264,
-			_flowVideoCodedVC2,
-			_flowVideoRaw,
-
-			// audio
-			_flowAudioRaw,
-		]),
+		z.object({
+			format: z.union([
+				z.literal('urn:x-nmos:format:video'),
+				z.literal('urn:x-nmos:format:audio'),
+				z.literal('urn:x-nmos:format:data'),
+				z.literal('urn:x-nmos:format:data.event'),
+				z.literal('urn:x-nmos:format:mux'),
+				z.string(),
+			]),
+			media_type: z.union([
+				z.literal('application/json'),
+				z.literal('video/SMPTE2022-6'),
+				z.literal('video/raw'),
+				z.literal('audio/L24'),
+				z.literal('audio/L20'),
+				z.literal('audio/L16'),
+				z.literal('audio/L8'),
+				z.string().startsWith('video/'),
+				z.string().startsWith('audio/'),
+				z.string().startsWith('text/'),
+				z.string(),
+			]),
+		}),
 	)
 	.and(looseFlow)
 	.describe('Describes a Flow')
