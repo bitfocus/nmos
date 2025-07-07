@@ -1,3 +1,5 @@
+import type { SupportedVersion } from './NMOS'
+
 export type NMOSDialect = null | 'test'
 
 export type NMOSNodeLinkOptions = {
@@ -9,7 +11,7 @@ export type NMOSNodeLinkOptions = {
 	strict: boolean
 	insecureHTTPParser: boolean
 	timeout?: number
-	is04Version?: 'v1.2' | 'v1.3' | 'auto' | string
+	is04Version?: SupportedVersion | 'auto'
 }
 
 export type NMOSDeviceRuntimeOptions = {

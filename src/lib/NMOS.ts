@@ -15,6 +15,7 @@ import nodeapiReceiversV12 from '../schema/is04/v1.2/zod/_receivers'
 import { safeSuperagent } from './neverthrow_superagent'
 import type { NeverthrowError, NeverthrowResult } from './neverthrow'
 import type { NMOSNodeLinkOptions } from './types'
+import { getHighestMatchingVersion } from './getHighestMatchingVersion'
 
 /*
 type IS04Endpoints = typeof is04endpoints
@@ -36,8 +37,8 @@ export type NmosResult<T> =
 			error: NeverthrowError
 	  }
 
-type SupportedVersion = 'v1.2' | 'v1.3'
-type AllUnsafeVersion = 'v1.0' | 'v1.1' | 'v1.2' | 'v1.3'
+export type SupportedVersion = 'v1.2' | 'v1.3'
+export type AllUnsafeVersion = 'v1.0' | 'v1.1' | 'v1.2' | 'v1.3'
 export class NMOSNodeApi {
 	static IS04_VERSIONS_ALL: AllUnsafeVersion[] = ['v1.0', 'v1.1', 'v1.2', 'v1.3']
 	static IS04_VERSIONS_SUPPORTED: SupportedVersion[] = ['v1.2', 'v1.3']
@@ -47,7 +48,7 @@ export class NMOSNodeApi {
 	private host: string
 	private port: number
 	private basePath: string
-	private requestedIS04Version: SupportedVersion | 'auto' | string | undefined
+	private requestedIS04Version: SupportedVersion | 'auto' | undefined
 	private verifiedIS04Version: SupportedVersion | undefined
 	private timeout = 2000
 	private insecureHTTPParser: boolean
@@ -56,6 +57,7 @@ export class NMOSNodeApi {
 		this.protocol = options.protocol
 		this.host = options.host
 		this.port = options.port
+		this.requestedIS04Version = options.is04Version
 		this.basePath = options.basePath
 		this.timeout = options.timeout || 2000
 		this.insecureHTTPParser = options.insecureHTTPParser || true
@@ -73,7 +75,8 @@ export class NMOSNodeApi {
 		this.verifiedIS04Version = version
 	}
 
-	async probeAndUseApiVersion(version?: SupportedVersion | 'auto' | string) {
+	async probeAndUseApiVersion() {
+		const version = this.requestedIS04Version
 		// if the version is auto, we need to:
 		// 1. probe the node for supported versions
 		// 2. use the highest version we support
@@ -440,21 +443,4 @@ export class NMOSNodeApi {
 
 		throw new Error('Unknown IS04 version')
 	}
-}
-
-/**
- * @param versions - The versions to check
- * @param supportedVersions - The versions we support
- * @returns The highest version we support, or null if no version is supported
- */
-const getHighestMatchingVersion = <T extends string[], U extends string[]>(
-	supportedVersions: T,
-	versions: U,
-): T[number] | null => {
-	return versions.reduce((highest: T[number] | null, version) => {
-		if (supportedVersions.includes(version)) {
-			return version
-		}
-		return highest
-	}, null)
 }
