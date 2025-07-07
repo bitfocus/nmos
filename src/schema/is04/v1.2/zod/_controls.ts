@@ -1,13 +1,10 @@
-import { z } from "zod";
-import { URNControlSchema } from "./_urns";
+import { z } from 'zod'
+import { URNControlSchema } from './_urns'
 
 /**
- * V1.2 is without auth
+ * V1.3 is with auth (not V1.2)
  */
-export const _deviceControlsItem = z.object({
-    href: z
-        .string()
-        .url()
-        .describe('URL to reach a control endpoint, whether http or otherwise'),
-    type: URNControlSchema.describe('URN identifying the control format'),
+export const _deviceControlsItemWithAuth = z.object({
+	href: z.string().url().describe('URL to reach a control endpoint, whether http or otherwise'),
+	type: URNControlSchema.describe('URN identifying the control format'),
 })

@@ -1,11 +1,4 @@
-import { unknown, z } from 'zod'
-import { idPrimitive } from './_primitives'
-import { tags } from './_propTags'
-import { _nmosResourceBase } from './_nnosResourceBase'
+import { z } from 'zod'
 import _device from './_device'
 
-export default z
-	.array(
-		_device
-	)
-	.describe('A list of Device resources')
+export default z.array(_device).describe('A list of Device resources')

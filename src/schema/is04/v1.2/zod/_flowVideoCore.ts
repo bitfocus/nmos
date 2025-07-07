@@ -1,5 +1,9 @@
 import { z } from "zod";
 
+
+const transfer_characteristic_since_IS04_1_1 = z.enum(['SDR', 'HLG', 'PQ'])
+const transfer_characteristic_since_IS04_1_3 = z.enum(['LINEAR', 'BT2100LINPQ', 'BT2100LINHLG', 'ST2065-1', 'ST428-1','DENSITY' ,'ST2115LOGS3','UNSPECIFIED'])
+
 export const _flowVideoCore = z.object({
     format: z
         .literal('urn:x-nmos:format:video')
@@ -16,7 +20,7 @@ export const _flowVideoCore = z.object({
             'Colorspace used for the video. Any values not defined in the enum should be defined in the NMOS Parameter Registers'
         ),
     transfer_characteristic: z
-        .union([z.enum(['SDR', 'HLG', 'PQ']), z.any()])
+        .union([transfer_characteristic_since_IS04_1_1, transfer_characteristic_since_IS04_1_3, z.any()])
         .describe(
             'Transfer characteristic. Any values not defined in the enum should be defined in the NMOS Parameter Registers'
         )
