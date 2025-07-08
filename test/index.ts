@@ -7,11 +7,12 @@ const nmos = new NMOSNode({
 	basePath: '/x-nmos',
 	dialect: 'test',
 	strict: true,
+	insecureHTTPParser: true,
 })
 
 async function main() {
-	const sources = await nmos.get('/node/v1.3/sources');
-	console.log("sources",sources);
+	const sources = await nmos.get('/node/v1.3/sources')
+	console.log('sources', sources)
 }
 
-main();
+main()
