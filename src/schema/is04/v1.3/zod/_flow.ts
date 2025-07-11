@@ -13,7 +13,7 @@ export const looseFlow = z.object({
 	transfer_characteristic: z.string().optional(),
 })
 
-export default _nmosResourceBase
+const _flow = _nmosResourceBase
 	.and(_flowBase)
 	.and(
 		z.object({
@@ -42,3 +42,7 @@ export default _nmosResourceBase
 	)
 	.and(looseFlow)
 	.describe('Describes a Flow')
+
+export type FlowBaseView = z.infer<typeof _flow>
+
+export default _flow

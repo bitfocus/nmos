@@ -3,7 +3,7 @@ import { _audioChannels } from './_propAudioChannels'
 import { _nmosResourceBase } from './_nnosResourceBase'
 import { _sourceBase } from './_sourceBase'
 
-export default _nmosResourceBase
+const _source = _nmosResourceBase
 	.and(_sourceBase)
 	.and(
 		z.discriminatedUnion('format', [
@@ -27,3 +27,7 @@ export default _nmosResourceBase
 		]),
 	)
 	.describe('Describes a Source')
+
+export type SourceBaseView = z.infer<typeof _source>
+
+export default _source

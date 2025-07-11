@@ -2,14 +2,14 @@ import { z } from 'zod'
 import { _nmosResourceBase } from './_nnosResourceBase'
 import { _macAdressPrimitive } from './_primitives'
 
-export const _endpoints = z.array(
-	z.object({
-		host: z.union([z.any(), z.any(), z.any()]).describe('IP address or hostname which the Node API is running on'),
-		port: z.number().int().gte(1).lte(65535).describe('Port number which the Node API is running on'),
-		protocol: z.enum(['http', 'https']).describe('Protocol supported by this instance of the Node API'),
-		authorization: z.boolean().describe('This endpoint requires authorization').default(false),
-	}),
-)
+export const _endpoint = z.object({
+	host: z.string().describe('IP address or hostname which the Node API is running on'),
+	port: z.number().int().gte(1).lte(65535).describe('Port number which the Node API is running on'),
+	protocol: z.enum(['http', 'https']).describe('Protocol supported by this instance of the Node API'),
+	authorization: z.boolean().describe('This endpoint requires authorization').default(false),
+})
+
+export const _endpoints = z.array(_endpoint)
 
 export const _nodeServices = z.array(
 	z.object({
@@ -89,7 +89,7 @@ export const _nodeInterfaces = z.array(
 
 export const nodeApiVersion = z.union([z.literal('v1.0'), z.literal('v1.1'), z.literal('v1.2'), z.literal('v1.3')])
 
-export default _nmosResourceBase
+const _node = _nmosResourceBase
 	.and(
 		z.object({
 			href: z.string().url().describe("HTTP access href for the Node's API (deprecated)"),
@@ -116,3 +116,7 @@ export default _nmosResourceBase
 		}),
 	)
 	.describe('Describes the Node and the services which run on it')
+
+export type NodeBaseView = z.infer<typeof _node>
+
+export default _node

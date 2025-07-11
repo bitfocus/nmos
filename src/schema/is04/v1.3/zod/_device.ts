@@ -11,7 +11,7 @@ export const _deviceControlsItemWithOptionalAuth = z.object({
 })
 export type DeviceControlsItemWithOptionalAuthType = z.infer<typeof _deviceControlsItemWithOptionalAuth>
 
-export default _nmosResourceBase
+const device = _nmosResourceBase
 	.and(
 		z.object({
 			type: z.string().describe('Device type URN'),
@@ -24,3 +24,7 @@ export default _nmosResourceBase
 		}),
 	)
 	.describe('Describes a Device')
+
+export type DeviceBaseView = z.infer<typeof device>
+
+export default device

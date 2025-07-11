@@ -7,7 +7,6 @@ export type NMOSNodeLinkOptions = {
 	host: string
 	port: number
 	basePath: string
-	dialect: NMOSDialect
 	strict: boolean
 	insecureHTTPParser: boolean
 	timeout?: number

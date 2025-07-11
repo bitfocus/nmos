@@ -4,7 +4,7 @@ import { _macAdressPrimitive } from './_primitives'
 
 export const _endpoints = z.array(
 	z.object({
-		host: z.union([z.any(), z.any(), z.any()]).describe('IP address or hostname which the Node API is running on'),
+		host: z.string().describe('IP address or hostname which the Node API is running on'),
 		port: z.number().int().gte(1).lte(65535).describe('Port number which the Node API is running on'),
 		protocol: z.enum(['http', 'https']).describe('Protocol supported by this instance of the Node API'),
 	}),

@@ -6,7 +6,11 @@ import { _receiverDataCore } from './_receiverDataCore'
 import { _receiverVideoCore } from './_receiverVideoCore'
 import { _receiverMuxCore } from './_receiverMuxCore'
 
-export default _nmosResourceBase
+const _receiver = _nmosResourceBase
 	.and(_receiverBase)
 	.and(z.discriminatedUnion('format', [_receiverAudioCore, _receiverVideoCore, _receiverDataCore, _receiverMuxCore]))
 	.describe('Describes a Receiver')
+
+export type ReceiverBaseView = z.infer<typeof _receiver>
+
+export default _receiver
