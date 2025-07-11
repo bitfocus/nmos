@@ -5,7 +5,6 @@ const nmos = new NMOSNode({
 	host: '10.0.0.3',
 	port: 8090,
 	basePath: '/x-nmos',
-	dialect: 'test',
 	strict: true,
 	insecureHTTPParser: true,
 })
