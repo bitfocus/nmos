@@ -7,7 +7,7 @@
 * TypeScript types for a good developer experience
 
 ## What is this really?
-AMWAs IS-04 JSON schema files, converted to zod, structured to their respective URLs with an Axios HTTP library to fetch the resources.
+AMWAs IS-04 JSON schema files, converted to zod, structured to their respective URLs with an Superagent HTTP library to fetch the resources.
 
 ## Install
 Depending on your package manager
