@@ -13,7 +13,8 @@ import nodeapiSendersV12 from '../schema/is04/v1.2/zod/_senders'
 import nodeapiReceiversV13 from '../schema/is04/v1.3/zod/_receivers'
 import nodeapiReceiversV12 from '../schema/is04/v1.2/zod/_receivers'
 import { safeSuperagent } from './neverthrow_superagent'
-import type { NeverthrowError, NeverthrowResult } from './neverthrow'
+import { ok, err } from 'neverthrow'
+import type { NeverthrowResult } from './neverthrow'
 import type { NMOSNodeLinkOptions } from './types'
 import { getHighestMatchingVersion } from './getHighestMatchingVersion'
 
@@ -27,15 +28,7 @@ export type IS05EndpointTypes = keyof typeof is05endpoints
 export type IS05EndpointType<T extends IS05EndpointTypes> = z.infer<IS05Endpoints[T]>
 */
 
-export type NmosResult<T> =
-	| {
-			ok: T
-			error: null
-	  }
-	| {
-			ok: null
-			error: NeverthrowError
-	  }
+export type NmosResult<T> = NeverthrowResult<T>
 
 export type SupportedVersion = 'v1.2' | 'v1.3'
 export type AllUnsafeVersion = 'v1.0' | 'v1.1' | 'v1.2' | 'v1.3'
@@ -84,27 +77,21 @@ export class NMOSNodeApi {
 		if (!version || version === 'auto') {
 			// check if the version is supported
 			const probe = await this.probeNodeApiSupport()
-			if (probe.error) {
-				return probe
+			if (probe.isErr()) {
+				return err(probe.error)
 			}
 
-			const highestVersion = getHighestMatchingVersion(NMOSNodeApi.IS04_VERSIONS_SUPPORTED, probe.ok)
+			const highestVersion = getHighestMatchingVersion(NMOSNodeApi.IS04_VERSIONS_SUPPORTED, probe.value)
 			if (!highestVersion) {
-				return {
-					ok: null,
-					error: {
-						code: 'VERSION_NO_MATCH' as const,
-						message: `No matching version found. Nodes versions: '${probe.ok.join(', ')}'. Supported versions: '${NMOSNodeApi.IS04_VERSIONS_SUPPORTED.join(',')}'`,
-					},
-				}
+				return err({
+					code: 'VERSION_NO_MATCH' as const,
+					message: `No matching version found. Nodes versions: '${probe.value.join(', ')}'. Supported versions: '${NMOSNodeApi.IS04_VERSIONS_SUPPORTED.join(',')}'`,
+				})
 			}
 
 			this.setIS04Version(highestVersion)
 
-			return {
-				ok: highestVersion,
-				error: null,
-			}
+			return ok(highestVersion)
 		}
 
 		// if a specific version is provided, we need to:
@@ -112,60 +99,45 @@ export class NMOSNodeApi {
 		// 2. set the version
 		// 3. if that fails, return a helpfull error message with request version and supported versions
 		const probe = await this.probeNodeApiSupport()
-		if (probe.error) {
-			return probe
+		if (probe.isErr()) {
+			return err(probe.error)
 		}
 
 		const requestVersionIsSupportedByButtons = NMOSNodeApi.SupportedVersionsSchema.safeParse(version).success
 		if (!requestVersionIsSupportedByButtons) {
-			return {
-				ok: null,
-				error: {
-					code: 'VERSION_NOT_SUPPORTED_BY_BUTTONS' as const,
-					message: `Reqeust API-version ${version} is not recognized`,
-				},
-			}
+			return err({
+				code: 'VERSION_NOT_SUPPORTED_BY_BUTTONS' as const,
+				message: `Reqeust API-version ${version} is not recognized`,
+			})
 		}
 
-		const requestedVersionIsSupportedByNode = getHighestMatchingVersion(probe.ok, [version])
+		const requestedVersionIsSupportedByNode = getHighestMatchingVersion(probe.value, [version])
 		if (!requestedVersionIsSupportedByNode) {
-			return {
-				ok: null,
-				error: {
-					code: 'VERSION_NOT_SUPPORTED_BY_NODE' as const,
-					message: `Requested API-version ${version} is not supported by the node. The node only supports: ${probe.ok.join(', ')}`,
-				},
-			}
+			return err({
+				code: 'VERSION_NOT_SUPPORTED_BY_NODE' as const,
+				message: `Requested API-version ${version} is not supported by the node. The node only supports: ${probe.value.join(', ')}`,
+			})
 		}
 
 		this.setIS04Version(version as SupportedVersion)
 
-		return {
-			ok: version,
-			error: null,
-		}
+		return ok(version)
 	}
 
 	async probeNodeApiSupport(): Promise<NmosResult<AllUnsafeVersion[]>> {
 		const response = await safeSuperagent(() => this.get(`${this.getBaseUrl()}/node`))
 
-		if (response.error) {
-			return { ok: null, error: response.error }
+		if (response.isErr()) {
+			return err(response.error)
 		}
 
-		const firstParse = z.array(z.string()).safeParse(response.ok.body)
+		const firstParse = z.array(z.string()).safeParse(response.value.body)
 
 		if (!firstParse.success) {
-			return {
-				ok: null,
-				error: { code: 'ZOD_ERROR', message: firstParse.error.message, issues: firstParse.error.issues },
-			}
+			return err({ code: 'ZOD_ERROR', message: firstParse.error.message, issues: firstParse.error.issues })
 		}
 
-		return {
-			ok: firstParse.data.map((s) => s.replace(/\/$/, '')) as AllUnsafeVersion[],
-			error: null,
-		}
+		return ok(firstParse.data.map((s) => s.replace(/\/$/, '')) as AllUnsafeVersion[])
 	}
 
 	requireIS04Version() {
@@ -182,40 +154,34 @@ export class NMOSNodeApi {
 		return superagent.get(url).timeout(this.timeout).disableTLSCerts().accept('json')
 	}
 
-	async nodeSelfGet(): Promise<NeverthrowResult<z.infer<typeof nodeapiSelfV13> | z.infer<typeof nodeapiSelfV12>>> {
+	async nodeSelfGet() {
 		console.log('nodeSelfGet', this.verifiedIS04Version)
 		this.requireIS04Version()
 		const httpRes = await safeSuperagent(() =>
 			this.get(`${this.getBaseUrl()}/node/${this.verifiedIS04Version}/self`),
 		)
 
-		if (httpRes.error) {
-			return { ok: null, error: httpRes.error }
+		if (httpRes.isErr()) {
+			return err(httpRes.error)
 		}
 
 		if (this.verifiedIS04Version === 'v1.3') {
-			const safe = nodeapiSelfV13.safeParse(httpRes.ok.body)
+			const safe = nodeapiSelfV13.safeParse(httpRes.value.body)
 			if (safe.error) {
-				return {
-					ok: null,
-					error: { code: 'ZOD_ERROR', message: safe.error.message, issues: safe.error.issues },
-				}
+				return err({ code: 'ZOD_ERROR', message: safe.error.message, issues: safe.error.issues })
 			}
 
-			return { ok: safe.data, error: null }
+			return ok(safe.data)
 		}
 
 		if (this.verifiedIS04Version === 'v1.2') {
-			const safe = nodeapiSelfV12.safeParse(httpRes.ok.body)
+			const safe = nodeapiSelfV12.safeParse(httpRes.value.body)
 			// do polyfill here....
 			if (safe.error) {
-				return {
-					ok: null,
-					error: { code: 'ZOD_ERROR', message: safe.error.message, issues: safe.error.issues },
-				}
+				return err({ code: 'ZOD_ERROR', message: safe.error.message, issues: safe.error.issues })
 			}
 
-			return { ok: safe.data, error: null }
+			return ok(safe.data)
 		}
 
 		throw new Error('Unknown IS04 version')
@@ -239,43 +205,34 @@ export class NMOSNodeApi {
 			this.get(`${this.getBaseUrl()}/node/${this.verifiedIS04Version}/devices`),
 		)
 
-		if (httpRes.error) {
-			return { ok: null, error: httpRes.error }
+		if (httpRes.isErr()) {
+			return err(httpRes.error)
 		}
 
 		if (this.verifiedIS04Version === 'v1.3') {
-			const safe = nodeapiDevicesV13.safeParse(httpRes.ok.body)
+			const safe = nodeapiDevicesV13.safeParse(httpRes.value.body)
 
 			if (safe.error) {
-				return {
-					ok: null,
-					error: { code: 'ZOD_ERROR', message: safe.error.message, issues: safe.error.issues },
-				}
+				return err({ code: 'ZOD_ERROR', message: safe.error.message, issues: safe.error.issues })
 			}
 
-			return { ok: safe.data, error: null }
+			return ok(safe.data)
 		}
 
 		if (this.verifiedIS04Version === 'v1.2') {
-			const safe = nodeapiDevicesV12.safeParse(httpRes.ok.body)
+			const safe = nodeapiDevicesV12.safeParse(httpRes.value.body)
 
 			if (safe.error) {
-				return {
-					ok: null,
-					error: { code: 'ZOD_ERROR', message: safe.error.message, issues: safe.error.issues },
-				}
+				return err({ code: 'ZOD_ERROR', message: safe.error.message, issues: safe.error.issues })
 			}
 
-			return { ok: safe.data, error: null }
+			return ok(safe.data)
 		}
 
-		return {
-			ok: null,
-			error: {
-				code: 'VERSION_UNKNOWN' as const,
-				message: 'Unknown IS04 version in nmosDevicesGet request',
-			},
-		}
+		return err({
+			code: 'VERSION_UNKNOWN' as const,
+			message: 'Unknown IS04 version in nmosDevicesGet request',
+		})
 	}
 
 	async nodeSourcesGet(): Promise<
@@ -287,34 +244,28 @@ export class NMOSNodeApi {
 			this.get(`${this.getBaseUrl()}/node/${this.verifiedIS04Version}/sources`),
 		)
 
-		if (httpRes.error) {
-			return { ok: null, error: httpRes.error }
+		if (httpRes.isErr()) {
+			return err(httpRes.error)
 		}
 
 		if (this.verifiedIS04Version === 'v1.3') {
-			const safe = nodeapiSourcesV13.safeParse(httpRes.ok.body)
+			const safe = nodeapiSourcesV13.safeParse(httpRes.value.body)
 
 			if (safe.error) {
-				return {
-					ok: null,
-					error: { code: 'ZOD_ERROR', message: safe.error.message, issues: safe.error.issues },
-				}
+				return err({ code: 'ZOD_ERROR', message: safe.error.message, issues: safe.error.issues })
 			}
 
-			return { ok: safe.data, error: null }
+			return ok(safe.data)
 		}
 
 		if (this.verifiedIS04Version === 'v1.2') {
-			const safe = nodeapiSourcesV12.safeParse(httpRes.ok.body)
+			const safe = nodeapiSourcesV12.safeParse(httpRes.value.body)
 
 			if (safe.error) {
-				return {
-					ok: null,
-					error: { code: 'ZOD_ERROR', message: safe.error.message, issues: safe.error.issues },
-				}
+				return err({ code: 'ZOD_ERROR', message: safe.error.message, issues: safe.error.issues })
 			}
 
-			return { ok: safe.data, error: null }
+			return ok(safe.data)
 		}
 
 		throw new Error('Unknown IS04 version')
@@ -327,34 +278,28 @@ export class NMOSNodeApi {
 			this.get(`${this.getBaseUrl()}/node/${this.verifiedIS04Version}/flows`),
 		)
 
-		if (httpRes.error) {
-			return { ok: null, error: httpRes.error }
+		if (httpRes.isErr()) {
+			return err(httpRes.error)
 		}
 
 		if (this.verifiedIS04Version === 'v1.3') {
-			const safe = nodeapiFlowsV13.safeParse(httpRes.ok.body)
+			const safe = nodeapiFlowsV13.safeParse(httpRes.value.body)
 
 			if (safe.error) {
-				return {
-					ok: null,
-					error: { code: 'ZOD_ERROR', message: safe.error.message, issues: safe.error.issues },
-				}
+				return err({ code: 'ZOD_ERROR', message: safe.error.message, issues: safe.error.issues })
 			}
 
-			return { ok: safe.data, error: null }
+			return ok(safe.data)
 		}
 
 		if (this.verifiedIS04Version === 'v1.2') {
-			const safe = nodeapiFlowsV12.safeParse(httpRes.ok.body)
+			const safe = nodeapiFlowsV12.safeParse(httpRes.value.body)
 
 			if (safe.error) {
-				return {
-					ok: null,
-					error: { code: 'ZOD_ERROR', message: safe.error.message, issues: safe.error.issues },
-				}
+				return err({ code: 'ZOD_ERROR', message: safe.error.message, issues: safe.error.issues })
 			}
 
-			return { ok: safe.data, error: null }
+			return ok(safe.data)
 		}
 
 		throw new Error('Unknown IS04 version')
@@ -369,34 +314,28 @@ export class NMOSNodeApi {
 			this.get(`${this.getBaseUrl()}/node/${this.verifiedIS04Version}/senders`),
 		)
 
-		if (httpRes.error) {
-			return { ok: null, error: httpRes.error }
+		if (httpRes.isErr()) {
+			return err(httpRes.error)
 		}
 
 		if (this.verifiedIS04Version === 'v1.3') {
-			const safe = nodeapiSendersV13.safeParse(httpRes.ok.body)
+			const safe = nodeapiSendersV13.safeParse(httpRes.value.body)
 
 			if (safe.error) {
-				return {
-					ok: null,
-					error: { code: 'ZOD_ERROR', message: safe.error.message, issues: safe.error.issues },
-				}
+				return err({ code: 'ZOD_ERROR', message: safe.error.message, issues: safe.error.issues })
 			}
 
-			return { ok: safe.data, error: null }
+			return ok(safe.data)
 		}
 
 		if (this.verifiedIS04Version === 'v1.2') {
-			const safe = nodeapiSendersV12.safeParse(httpRes.ok.body)
+			const safe = nodeapiSendersV12.safeParse(httpRes.value.body)
 
 			if (safe.error) {
-				return {
-					ok: null,
-					error: { code: 'ZOD_ERROR', message: safe.error.message, issues: safe.error.issues },
-				}
+				return err({ code: 'ZOD_ERROR', message: safe.error.message, issues: safe.error.issues })
 			}
 
-			return { ok: safe.data, error: null }
+			return ok(safe.data)
 		}
 
 		throw new Error('Unknown IS04 version')
@@ -411,34 +350,28 @@ export class NMOSNodeApi {
 			this.get(`${this.getBaseUrl()}/node/${this.verifiedIS04Version}/receivers`),
 		)
 
-		if (httpRes.error) {
-			return { ok: null, error: httpRes.error }
+		if (httpRes.isErr()) {
+			return err(httpRes.error)
 		}
 
 		if (this.verifiedIS04Version === 'v1.3') {
-			const safe = nodeapiReceiversV13.safeParse(httpRes.ok.body)
+			const safe = nodeapiReceiversV13.safeParse(httpRes.value.body)
 
 			if (safe.error) {
-				return {
-					ok: null,
-					error: { code: 'ZOD_ERROR', message: safe.error.message, issues: safe.error.issues },
-				}
+				return err({ code: 'ZOD_ERROR', message: safe.error.message, issues: safe.error.issues })
 			}
 
-			return { ok: safe.data, error: null }
+			return ok(safe.data)
 		}
 
 		if (this.verifiedIS04Version === 'v1.2') {
-			const safe = nodeapiReceiversV12.safeParse(httpRes.ok.body)
+			const safe = nodeapiReceiversV12.safeParse(httpRes.value.body)
 
 			if (safe.error) {
-				return {
-					ok: null,
-					error: { code: 'ZOD_ERROR', message: safe.error.message, issues: safe.error.issues },
-				}
+				return err({ code: 'ZOD_ERROR', message: safe.error.message, issues: safe.error.issues })
 			}
 
-			return { ok: safe.data, error: null }
+			return ok(safe.data)
 		}
 
 		throw new Error('Unknown IS04 version')
