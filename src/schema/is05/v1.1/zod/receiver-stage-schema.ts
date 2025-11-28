@@ -14,6 +14,10 @@ const activationSchema = z.discriminatedUnion('mode', [
 	}),
 	z.object({
 		mode: z.literal('activate_immediate'),
+		requested_time: z
+			.string()
+			.regex(/^[0-9]+:[0-9]+$/)
+			.nullable(),
 	}),
 	z.object({
 		mode: z.literal('activate_scheduled_absolute'),
