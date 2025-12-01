@@ -2,7 +2,7 @@
 //import activation from './zod/activation-schema.json';
 import bulkReceiverPost from './zod/bulk-receiver-post-schema'
 //import bulkResponse from './zod/bulk-response-schema.json';
-import bulkSenderPost from './zod/bulk-sender-post-schema.json'
+import bulkSenderPost from './zod/bulk-sender-post-schema'
 import connectionApiBase from './zod/connectionapi-base.json'
 import connectionApiBulk from './zod/connectionapi-bulk.json'
 import connectionApiReceiver from './zod/connectionapi-receiver.json'
@@ -25,7 +25,7 @@ import receiverStage from './zod/receiver-stage-schema'
 //import receiverTransportParamsWebSocket from './zod/receiver_transport_params_websocket.json';
 //import senderReceiverBase from './zod/sender-receiver-base.json';
 import senderResponse from './zod/sender-response-schema.json'
-import senderStage from './zod/sender-stage-schema.json'
+import senderStage from './zod/sender-stage-schema'
 import senderTransportParams from './zod/sender_transport_params.json'
 //import senderTransportParamsDash from './zod/sender_transport_params_dash.json';
 //import senderTransportParamsExt from './zod/sender_transport_params_ext.json';
