@@ -3,7 +3,7 @@ import { idPrimitive } from '../../../is04/v1.3/zod/_primitives'
 
 export default z
 	.object({
-		receiver_id: idPrimitive.optional(),
+		receiver_id: idPrimitive.nullable().optional(),
 		master_enable: z.boolean().describe('Master on/off control for sender').optional(),
 		activation: z
 			.object({
