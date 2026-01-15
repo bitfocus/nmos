@@ -166,6 +166,7 @@ export const effectSuperagent = (
 
 		// Set up abort handler for when the effect is interrupted
 		signal.addEventListener('abort', () => {
+			console.log(`[Superagent] Aborting HTTP request: ${url}`)
 			req.abort()
 		})
 
@@ -177,6 +178,7 @@ export const effectSuperagent = (
 			(error) => {
 				// Don't report errors if we aborted the request
 				if (signal.aborted) {
+					console.log(`[Superagent] Request aborted (ignoring error): ${url}`)
 					return
 				}
 
