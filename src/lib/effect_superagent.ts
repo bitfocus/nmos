@@ -120,7 +120,32 @@ const toSuperagentError = (error: unknown, url?: string): SuperagentError => {
 }
 
 /**
- * Wraps a superagent request in an Effect
+ * Extracts URL from superagent error object
+ */
+const extractUrlFromError = (error: unknown, fallbackUrl: string): string => {
+	if (error && typeof error === 'object') {
+		// Superagent errors typically have a 'request' property with the request object
+		const errorObj = error as unknown as { request?: { url?: string; _url?: string } }
+		if (errorObj.request) {
+			const errorUrl = errorObj.request.url || errorObj.request._url
+			if (errorUrl) {
+				return errorUrl
+			}
+		}
+		// Also check for direct url property (some error formats)
+		if ('url' in error) {
+			const errorUrl = (error as { url: string }).url
+			if (errorUrl) {
+				return errorUrl
+			}
+		}
+	}
+	return fallbackUrl
+}
+
+/**
+ * Wraps a superagent request in an interruptible Effect.
+ * When the effect is interrupted, the HTTP request is aborted via request.abort().
  *
  * @example
  * ```ts
@@ -135,38 +160,35 @@ export const effectSuperagent = (
 	request: superagent.Request,
 	timeout?: number,
 ): Effect.Effect<superagent.Response, SuperagentError> =>
-	Effect.tryPromise({
-		try: async () => {
-			// Execute the superagent request (it's thenable)
-			return await request.disableTLSCerts().timeout(timeout ?? 10000)
-		},
-		catch: (error) => {
-			// Try to extract URL from superagent error object as fallback
-			let extractedUrl = url
-			if (error && typeof error === 'object') {
-				// Superagent errors typically have a 'request' property with the request object
-				const errorObj = error as unknown as { request?: { url?: string; _url?: string } }
-				if (errorObj.request) {
-					const errorUrl = errorObj.request.url || errorObj.request._url
-					if (errorUrl) {
-						extractedUrl = errorUrl
-					}
-				}
-				// Also check for direct url property (some error formats)
-				if (extractedUrl === url && 'url' in error) {
-					const errorUrl = (error as { url: string }).url
-					if (errorUrl) {
-						extractedUrl = errorUrl
-					}
-				}
-			}
+	Effect.async<superagent.Response, SuperagentError>((resume, signal) => {
+		// Configure and execute the request
+		const req = request.disableTLSCerts().timeout(timeout ?? 10000)
 
-			// Log error with URL for debugging
-			const errorMessage = error instanceof Error ? error.message : String(error)
-			console.error(`[SuperagentError] Request failed: ${errorMessage} (URL: ${extractedUrl})`)
+		// Set up abort handler for when the effect is interrupted
+		signal.addEventListener('abort', () => {
+			req.abort()
+		})
 
-			return toSuperagentError(error, extractedUrl)
-		},
+		// Execute the request
+		req.then(
+			(response) => {
+				resume(Effect.succeed(response))
+			},
+			(error) => {
+				// Don't report errors if we aborted the request
+				if (signal.aborted) {
+					return
+				}
+
+				const extractedUrl = extractUrlFromError(error, url)
+
+				// Log error with URL for debugging
+				const errorMessage = error instanceof Error ? error.message : String(error)
+				console.error(`[SuperagentError] Request failed: ${errorMessage} (URL: ${extractedUrl})`)
+
+				resume(Effect.fail(toSuperagentError(error, extractedUrl)))
+			},
+		)
 	})
 
 /**
